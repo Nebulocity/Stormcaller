@@ -7,14 +7,14 @@
  */
 
 import Phaser             from 'phaser';
-import BootScene          from './stormcaller/scenes/BootScene.js';
-import PreloadScene       from './stormcaller/scenes/PreloadScene.js';
-import TitleScene         from './stormcaller/scenes/TitleScene.js';
-import RaidSelectScene    from './stormcaller/scenes/RaidSelectScene.js';
-import RaidBossSelectScene from './stormcaller/scenes/RaidBossSelectScene.js';
-import BossLoadingScene   from './stormcaller/scenes/BossLoadingScene.js';
-import GameScene          from './stormcaller/scenes/GameScene.js';
-import UIScene            from './stormcaller/scenes/UIScene.js';
+import BootScene          from './scenes/BootScene.js';
+import PreloadScene       from './scenes/PreloadScene.js';
+import TitleScene         from './scenes/TitleScene.js';
+import RaidSelectScene    from './scenes/RaidSelectScene.js';
+import RaidBossSelectScene from './scenes/RaidBossSelectScene.js';
+import BossLoadingScene   from './scenes/BossLoadingScene.js';
+import GameScene          from './scenes/GameScene.js';
+import UIScene            from './scenes/UIScene.js';
 
 // Layout constants (shared across all scenes via window.GAME_CONFIG)
 window.GAME_CONFIG = {
