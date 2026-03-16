@@ -7,9 +7,6 @@ const Phaser = window.Phaser;
  * Boss-specific gameplay JSON and art are loaded later by BossLoadingScene.
  */
 
-const Phaser = window.Phaser;
-
-
 export default class PreloadScene extends Phaser.Scene {
   constructor() {
     super({ key: 'PreloadScene' });
