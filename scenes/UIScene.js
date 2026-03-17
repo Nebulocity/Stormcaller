@@ -1,5 +1,3 @@
-const Phaser = window.Phaser;
-
 /**
  * UIScene.js
  *
