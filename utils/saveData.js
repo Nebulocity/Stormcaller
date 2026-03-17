@@ -3,7 +3,7 @@
  *
  * Very small localStorage wrapper for title / raid / boss menu progress.
  */
-const SAVE_KEY = 'stormcaller_save_v1';
+const SAVE_KEY = 'raidnight_save_v1';
 
 export function createDefaultSaveData() {
   return {

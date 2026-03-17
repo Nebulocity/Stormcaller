@@ -6,8 +6,8 @@
     "recommendedPartySize": 3,
     "contentRole": "content_pack",
     "notes": [
-      "Standalone raid-data file for Stormcaller content authoring.",
-      "Ability behaviors are designed to feel like spookspire_keep/TBC mechanics while staying simple enough to map into Stormcaller later.",
+      "Standalone raid-data file for Raid Night content authoring.",
+      "Ability behaviors are designed to feel like spookspire_keep/TBC mechanics while staying simple enough to map into Raid Night later.",
       "Several fights include multi-actor encounters and scripted phase notes that would need scene logic beyond the current single-boss level01 runtime."
     ]
   },
@@ -87,7 +87,7 @@
           "immediateMin": 1400,
           "immediateMax": 2200,
           "recastTimer": 8,
-          "stormcallerHint": "Frontal cleave on highest-threat target that splashes a lighter hit to one adjacent ally.",
+          "raidnightHint": "Frontal cleave on highest-threat target that splashes a lighter hit to one adjacent ally.",
           "wowAnalog": "Shadow Cleave"
         },
         "stable_stench": {
@@ -108,7 +108,7 @@
           "tickMin": 180,
           "tickMax": 260,
           "recastTimer": 14,
-          "stormcallerHint": "Raid-wide cursed stink that lightly chips health and could reduce hit chance by 2%.",
+          "raidnightHint": "Raid-wide cursed stink that lightly chips health and could reduce hit chance by 2%.",
           "wowAnalog": "Intangible Presence"
         },
         "rusted_axe_arc": {
@@ -122,7 +122,7 @@
           "immediateMin": 1700,
           "immediateMax": 2600,
           "recastTimer": 10,
-          "stormcallerHint": "Single-target heavy chop from Trotsalot.",
+          "raidnightHint": "Single-target heavy chop from Trotsalot.",
           "wowAnalog": "Mounted melee pressure"
         },
         "graveyard_gallop": {
@@ -136,7 +136,7 @@
           "immediateMin": 2000,
           "immediateMax": 3200,
           "recastTimer": 16,
-          "stormcallerHint": "Rushes a random non-tank target, briefly dropping threat focus before snapping back.",
+          "raidnightHint": "Rushes a random non-tank target, briefly dropping threat focus before snapping back.",
           "wowAnalog": "Berserker Charge"
         },
         "back_in_the_saddle": {
@@ -163,7 +163,7 @@
           "tickEffect": null,
           "recastTimer": 999,
           "targetType": "self",
-          "stormcallerHint": "One-time transition buff when rider mounts Nighttime.",
+          "raidnightHint": "One-time transition buff when rider mounts Nighttime.",
           "wowAnalog": "Attumen mounting Midnight"
         }
       }
@@ -232,7 +232,7 @@
           "immediateMin": 1500,
           "immediateMax": 2300,
           "recastTimer": 10,
-          "stormcallerHint": "Hits the tank and briefly lowers their threat generation or forces a target swap feel.",
+          "raidnightHint": "Hits the tank and briefly lowers their threat generation or forces a target swap feel.",
           "wowAnalog": "Gouge"
         },
         "blinding_napkin": {
@@ -254,7 +254,7 @@
           "tickEffect": null,
           "recastTimer": 14,
           "targetType": "random_ally",
-          "stormcallerHint": "Short disorient on a random ally.",
+          "raidnightHint": "Short disorient on a random ally.",
           "wowAnalog": "Blind"
         },
         "butlers_exit": {
@@ -277,7 +277,7 @@
           "tickEffect": null,
           "recastTimer": 18,
           "targetType": "self",
-          "stormcallerHint": "Brief vanish that drops target lock and primes Garrote.",
+          "raidnightHint": "Brief vanish that drops target lock and primes Garrote.",
           "wowAnalog": "Vanish"
         },
         "black_tie_garrote": {
@@ -295,7 +295,7 @@
           "tickMax": 340,
           "recastTimer": 20,
           "targetType": "random_ally",
-          "stormcallerHint": "Long bleed on one non-tank target; intended to feel scary for the healer.",
+          "raidnightHint": "Long bleed on one non-tank target; intended to feel scary for the healer.",
           "wowAnalog": "Garrote"
         },
         "panic_service": {
@@ -322,7 +322,7 @@
           "tickEffect": null,
           "recastTimer": 40,
           "targetType": "self",
-          "stormcallerHint": "Soft enrage below 30%.",
+          "raidnightHint": "Soft enrage below 30%.",
           "wowAnalog": "Moroes Frenzy"
         }
       }
@@ -382,7 +382,7 @@
           "tickMin": 180,
           "tickMax": 260,
           "recastTimer": 10,
-          "stormcallerHint": "Holy burn on a random ally with a short lingering tick.",
+          "raidnightHint": "Holy burn on a random ally with a short lingering tick.",
           "wowAnalog": "Holy Fire"
         },
         "proper_rebuke": {
@@ -396,7 +396,7 @@
           "immediateMin": 1200,
           "immediateMax": 1800,
           "recastTimer": 14,
-          "stormcallerHint": "Bounces through the party, dealing higher damage when allies are all alive.",
+          "raidnightHint": "Bounces through the party, dealing higher damage when allies are all alive.",
           "wowAnalog": "Holy Wrath"
         },
         "time_out": {
@@ -418,7 +418,7 @@
           "tickEffect": null,
           "recastTimer": 20,
           "targetType": "all_allies",
-          "stormcallerHint": "Short party-wide stun/disorient, except the highest-threat target if you want a tank-safe implementation.",
+          "raidnightHint": "Short party-wide stun/disorient, except the highest-threat target if you want a tank-safe implementation.",
           "wowAnalog": "Repentance"
         },
         "sanctified_floor_wax": {
@@ -436,7 +436,7 @@
           "tickMax": 220,
           "recastTimer": 18,
           "targetType": "all_allies",
-          "stormcallerHint": "Persistent radiant floor damage aura while active.",
+          "raidnightHint": "Persistent radiant floor damage aura while active.",
           "wowAnalog": "Holy Ground"
         }
       }
@@ -496,7 +496,7 @@
           "tickEffect": null,
           "recastTimer": 18,
           "targetType": "random_ally",
-          "stormcallerHint": "Fixates one non-tank target and chases them for a few seconds.",
+          "raidnightHint": "Fixates one non-tank target and chases them for a few seconds.",
           "wowAnalog": "Little Red Riding Hood"
         },
         "feedback_howl": {
@@ -518,7 +518,7 @@
           "tickEffect": null,
           "recastTimer": 15,
           "targetType": "all_allies",
-          "stormcallerHint": "Short fear-like control burst.",
+          "raidnightHint": "Short fear-like control burst.",
           "wowAnalog": "Terrifying Howl"
         },
         "aisle_rake": {
@@ -532,7 +532,7 @@
           "immediateMin": 1900,
           "immediateMax": 2800,
           "recastTimer": 9,
-          "stormcallerHint": "Heavy melee sweep on the tank.",
+          "raidnightHint": "Heavy melee sweep on the tank.",
           "wowAnalog": "Wide Swipe"
         }
       }
@@ -627,7 +627,7 @@
           "tickEffect": null,
           "recastTimer": 12,
           "targetType": "random_ally",
-          "stormcallerHint": "Brief disorient from Juliette.",
+          "raidnightHint": "Brief disorient from Juliette.",
           "wowAnalog": "Blinding Passion"
         },
         "center_stage_pull": {
@@ -649,7 +649,7 @@
           "tickEffect": null,
           "recastTimer": 14,
           "targetType": "highest_threat",
-          "stormcallerHint": "Threat shakeup that encourages repositioning or aggro recovery.",
+          "raidnightHint": "Threat shakeup that encourages repositioning or aggro recovery.",
           "wowAnalog": "Powerful Attraction"
         },
         "love_scene_retake": {
@@ -668,7 +668,7 @@
           "tickEffect": null,
           "recastTimer": 18,
           "targetType": "self",
-          "stormcallerHint": "Juliette heals herself or Romeo.",
+          "raidnightHint": "Juliette heals herself or Romeo.",
           "wowAnalog": "Eternal Affection"
         },
         "critics_dagger": {
@@ -689,7 +689,7 @@
           "tickMin": 180,
           "tickMax": 260,
           "recastTimer": 10,
-          "stormcallerHint": "Romeo poisons the current target.",
+          "raidnightHint": "Romeo poisons the current target.",
           "wowAnalog": "Poisoned Thrust"
         },
         "stage_dive": {
@@ -703,7 +703,7 @@
           "immediateMin": 1900,
           "immediateMax": 2800,
           "recastTimer": 11,
-          "stormcallerHint": "Romeo lunges aggressively at the tank.",
+          "raidnightHint": "Romeo lunges aggressively at the tank.",
           "wowAnalog": "Backward Lunge"
         },
         "grandstanding": {
@@ -726,7 +726,7 @@
           "tickEffect": null,
           "recastTimer": 16,
           "targetType": "self",
-          "stormcallerHint": "Short self-buff for Romeo.",
+          "raidnightHint": "Short self-buff for Romeo.",
           "wowAnalog": "Daring"
         },
         "no_one_leaves_before_the_finale": {
@@ -749,7 +749,7 @@
           "tickEffect": null,
           "recastTimer": 999,
           "targetType": "self",
-          "stormcallerHint": "If one lover 'dies' too early, the other revives them once unless both are finished close together.",
+          "raidnightHint": "If one lover 'dies' too early, the other revives them once unless both are finished close together.",
           "wowAnalog": "Romulo & Julianne shared death mechanic"
         }
       }
@@ -823,7 +823,7 @@
           "immediateMin": 1200,
           "immediateMax": 1900,
           "recastTimer": 8,
-          "stormcallerHint": "Dorothy peppers random targets with storm magic.",
+          "raidnightHint": "Dorothy peppers random targets with storm magic.",
           "wowAnalog": "Dorothee ranged spell pressure"
         },
         "yapping_frenzy": {
@@ -837,7 +837,7 @@
           "immediateMin": 800,
           "immediateMax": 1200,
           "recastTimer": 10,
-          "stormcallerHint": "Toto harasses a random target with quick bites.",
+          "raidnightHint": "Toto harasses a random target with quick bites.",
           "wowAnalog": "Tito nuisance attacks"
         },
         "oil_can_chop": {
@@ -851,7 +851,7 @@
           "immediateMin": 1600,
           "immediateMax": 2400,
           "recastTimer": 9,
-          "stormcallerHint": "Tin Man cleaves the tank with stiff metallic swings.",
+          "raidnightHint": "Tin Man cleaves the tank with stiff metallic swings.",
           "wowAnalog": "Tinhead melee pressure"
         },
         "cowardly_pounce": {
@@ -867,7 +867,7 @@
           "duration": 2,
           "tickEffect": null,
           "recastTimer": 13,
-          "stormcallerHint": "The Cowardly Lion startles one target and may briefly fear them.",
+          "raidnightHint": "The Cowardly Lion startles one target and may briefly fear them.",
           "wowAnalog": "Roar fear pressure"
         },
         "projector_vortex": {
@@ -889,7 +889,7 @@
           "tickEffect": null,
           "recastTimer": 18,
           "targetType": "random_ally",
-          "stormcallerHint": "Wicked Witch whirls one target out of action briefly.",
+          "raidnightHint": "Wicked Witch whirls one target out of action briefly.",
           "wowAnalog": "Cyclone"
         },
         "broomfire_barrage": {
@@ -903,7 +903,7 @@
           "immediateMin": 1000,
           "immediateMax": 1500,
           "recastTimer": 16,
-          "stormcallerHint": "Light raid-wide fire burst from the Witch.",
+          "raidnightHint": "Light raid-wide fire burst from the Witch.",
           "wowAnalog": "Witch caster pressure"
         }
       }
@@ -973,7 +973,7 @@
           "tickEffect": null,
           "recastTimer": 10,
           "targetType": "self",
-          "stormcallerHint": "Summons one astral add equivalent that pressures the party.",
+          "raidnightHint": "Summons one astral add equivalent that pressures the party.",
           "wowAnalog": "Astral Flare"
         },
         "condescending_citation": {
@@ -987,7 +987,7 @@
           "immediateMin": 1800,
           "immediateMax": 2600,
           "recastTimer": 8,
-          "stormcallerHint": "Heavy arcane bolt aimed at the mana user with the most resources or a non-tank ally.",
+          "raidnightHint": "Heavy arcane bolt aimed at the mana user with the most resources or a non-tank ally.",
           "wowAnalog": "Hateful Bolt"
         },
         "catalog_reorganization": {
@@ -1014,7 +1014,7 @@
           "tickEffect": null,
           "recastTimer": 30,
           "targetType": "self",
-          "stormcallerHint": "Stops attacking, takes extra damage, and 'recharges' before resuming.",
+          "raidnightHint": "Stops attacking, takes extra damage, and 'recharges' before resuming.",
           "wowAnalog": "Evocation"
         },
         "archive_lockdown": {
@@ -1041,7 +1041,7 @@
           "tickEffect": null,
           "recastTimer": 999,
           "targetType": "self",
-          "stormcallerHint": "Permanent execute-phase enrage.",
+          "raidnightHint": "Permanent execute-phase enrage.",
           "wowAnalog": "Curator last phase burn"
         }
       }
@@ -1101,7 +1101,7 @@
           "tickMax": 380,
           "recastTimer": 20,
           "targetType": "random_ally",
-          "stormcallerHint": "Pins one target in place and drains them until broken out.",
+          "raidnightHint": "Pins one target in place and drains them until broken out.",
           "wowAnalog": "Sacrifice"
         },
         "fel_stable_hex": {
@@ -1115,7 +1115,7 @@
           "immediateMin": 1300,
           "immediateMax": 2100,
           "recastTimer": 7,
-          "stormcallerHint": "Frequent shadow nuke.",
+          "raidnightHint": "Frequent shadow nuke.",
           "wowAnalog": "Shadow Bolt"
         },
         "blackhoof_familiar": {
@@ -1133,7 +1133,7 @@
           "tickEffect": null,
           "recastTimer": 30,
           "targetType": "self",
-          "stormcallerHint": "Persistent pet that buffs the boss until killed.",
+          "raidnightHint": "Persistent pet that buffs the boss until killed.",
           "wowAnalog": "Kil'rek"
         },
         "hellstall_swarm": {
@@ -1151,7 +1151,7 @@
           "tickEffect": null,
           "recastTimer": 18,
           "targetType": "self",
-          "stormcallerHint": "Small imp pack floods the party with chip damage.",
+          "raidnightHint": "Small imp pack floods the party with chip damage.",
           "wowAnalog": "Fiendish Portals / imps"
         }
       }
@@ -1226,7 +1226,7 @@
           "tickMax": 360,
           "recastTimer": 18,
           "targetType": "all_allies",
-          "stormcallerHint": "Party-wide warning mechanic: if anyone 'moves' or takes another action too soon, apply extra fire damage.",
+          "raidnightHint": "Party-wide warning mechanic: if anyone 'moves' or takes another action too soon, apply extra fire damage.",
           "wowAnalog": "Flame Wreath"
         },
         "ghostfrost_squall": {
@@ -1247,7 +1247,7 @@
           "tickMin": 120,
           "tickMax": 180,
           "recastTimer": 12,
-          "stormcallerHint": "Blizzard-like room pressure.",
+          "raidnightHint": "Blizzard-like room pressure.",
           "wowAnalog": "Blizzard"
         },
         "library_detonation": {
@@ -1261,7 +1261,7 @@
           "immediateMin": 2200,
           "immediateMax": 3200,
           "recastTimer": 16,
-          "stormcallerHint": "Large room-wide burst that should be telegraphed.",
+          "raidnightHint": "Large room-wide burst that should be telegraphed.",
           "wowAnalog": "Arcane Explosion"
         },
         "ectoplasmic_shackles": {
@@ -1283,7 +1283,7 @@
           "tickEffect": null,
           "recastTimer": 10,
           "targetType": "random_ally",
-          "stormcallerHint": "Short control effect on one target.",
+          "raidnightHint": "Short control effect on one target.",
           "wowAnalog": "Chains of Ice"
         },
         "classroom_detention": {
@@ -1305,7 +1305,7 @@
           "tickEffect": null,
           "recastTimer": 24,
           "targetType": "all_allies",
-          "stormcallerHint": "Mass polymorph-style pause that sets up the next cast.",
+          "raidnightHint": "Mass polymorph-style pause that sets up the next cast.",
           "wowAnalog": "Mass Polymorph"
         },
         "final_exam": {
@@ -1319,7 +1319,7 @@
           "immediateMin": 2800,
           "immediateMax": 4200,
           "recastTimer": 26,
-          "stormcallerHint": "Huge single-target nuke after Detention if not interrupted.",
+          "raidnightHint": "Huge single-target nuke after Detention if not interrupted.",
           "wowAnalog": "Pyroblast"
         }
       }
@@ -1409,7 +1409,7 @@
           "tickEffect": null,
           "recastTimer": 12,
           "targetType": "self",
-          "stormcallerHint": "Red-beam analogue: increases boss damage while one ally soaks it.",
+          "raidnightHint": "Red-beam analogue: increases boss damage while one ally soaks it.",
           "wowAnalog": "Perseverance beam / red beam"
         },
         "menders_ray": {
@@ -1428,7 +1428,7 @@
           "tickEffect": null,
           "recastTimer": 14,
           "targetType": "self",
-          "stormcallerHint": "Green-beam analogue: heals the boss unless handled.",
+          "raidnightHint": "Green-beam analogue: heals the boss unless handled.",
           "wowAnalog": "Serenity beam / green beam"
         },
         "mindlash_ray": {
@@ -1445,7 +1445,7 @@
           "tickEffect": null,
           "recastTimer": 11,
           "targetType": "highest_mana",
-          "stormcallerHint": "Blue-beam analogue: drains mana and amplifies magic pressure.",
+          "raidnightHint": "Blue-beam analogue: drains mana and amplifies magic pressure.",
           "wowAnalog": "Dominance beam / blue beam"
         },
         "collapsed_constellation": {
@@ -1463,7 +1463,7 @@
           "tickMax": 280,
           "recastTimer": 15,
           "targetType": "all_allies",
-          "stormcallerHint": "Persistent void-zone style raid damage.",
+          "raidnightHint": "Persistent void-zone style raid damage.",
           "wowAnalog": "Void Zone"
         },
         "astral_breath": {
@@ -1477,7 +1477,7 @@
           "immediateMin": 1800,
           "immediateMax": 2800,
           "recastTimer": 9,
-          "stormcallerHint": "Heavy tank breath in banish phase.",
+          "raidnightHint": "Heavy tank breath in banish phase.",
           "wowAnalog": "Netherbreath"
         },
         "starburn": {
@@ -1495,7 +1495,7 @@
           "tickMax": 320,
           "recastTimer": 14,
           "targetType": "random_ally",
-          "stormcallerHint": "Nether Burn style magical DoT.",
+          "raidnightHint": "Nether Burn style magical DoT.",
           "wowAnalog": "Nether Burn"
         },
         "planar_drift": {
@@ -1522,7 +1522,7 @@
           "tickEffect": null,
           "recastTimer": 30,
           "targetType": "self",
-          "stormcallerHint": "Banish-phase swap with altered resistances and softer melee presence.",
+          "raidnightHint": "Banish-phase swap with altered resistances and softer melee presence.",
           "wowAnalog": "Banish phase"
         }
       }
@@ -1610,7 +1610,7 @@
           "tickMax": 280,
           "recastTimer": 10,
           "targetType": "random_ally",
-          "stormcallerHint": "Shadow Word: Pain style curse.",
+          "raidnightHint": "Shadow Word: Pain style curse.",
           "wowAnalog": "Shadow Word: Pain"
         },
         "withering_insult": {
@@ -1632,7 +1632,7 @@
           "tickEffect": null,
           "recastTimer": 18,
           "targetType": "all_allies",
-          "stormcallerHint": "Temporarily crushes everyone's health toward 1 HP without killing them.",
+          "raidnightHint": "Temporarily crushes everyone's health toward 1 HP without killing them.",
           "wowAnalog": "Enfeeble"
         },
         "royal_tantrum": {
@@ -1646,7 +1646,7 @@
           "immediateMin": 1800,
           "immediateMax": 2600,
           "recastTimer": 14,
-          "stormcallerHint": "Room-wide Shadow Nova burst.",
+          "raidnightHint": "Room-wide Shadow Nova burst.",
           "wowAnalog": "Shadow Nova"
         },
         "drop_the_chandelier": {
@@ -1664,7 +1664,7 @@
           "tickEffect": null,
           "recastTimer": 20,
           "targetType": "random_ally",
-          "stormcallerHint": "Infernal-style hazard lands on a target zone and keeps burning it.",
+          "raidnightHint": "Infernal-style hazard lands on a target zone and keeps burning it.",
           "wowAnalog": "Summon Infernal"
         },
         "dual_inconveniences": {
@@ -1691,7 +1691,7 @@
           "tickEffect": null,
           "recastTimer": 999,
           "targetType": "self",
-          "stormcallerHint": "Phase 3 weapon shift to faster attacks.",
+          "raidnightHint": "Phase 3 weapon shift to faster attacks.",
           "wowAnalog": "Prince axes phase"
         },
         "title_backed_smackdown": {
@@ -1705,7 +1705,7 @@
           "immediateMin": 1200,
           "immediateMax": 1800,
           "recastTimer": 12,
-          "stormcallerHint": "Adds a stacking armor reduction to the tank.",
+          "raidnightHint": "Adds a stacking armor reduction to the tank.",
           "wowAnalog": "Sunder Armor"
         }
       }
@@ -1800,7 +1800,7 @@
           "immediateMin": 1900,
           "immediateMax": 2800,
           "recastTimer": 8,
-          "stormcallerHint": "Basic cleave on the tank.",
+          "raidnightHint": "Basic cleave on the tank.",
           "wowAnalog": "Cleave"
         },
         "cryptfire_breath": {
@@ -1821,7 +1821,7 @@
           "tickMin": 180,
           "tickMax": 260,
           "recastTimer": 12,
-          "stormcallerHint": "Tank breath with short burn.",
+          "raidnightHint": "Tank breath with short burn.",
           "wowAnalog": "Smoldering Breath"
         },
         "restless_ashes": {
@@ -1839,7 +1839,7 @@
           "tickMax": 280,
           "recastTimer": 14,
           "targetType": "all_allies",
-          "stormcallerHint": "Charred-earth style ground hazard.",
+          "raidnightHint": "Charred-earth style ground hazard.",
           "wowAnalog": "Charred Earth"
         },
         "sepulcher_sweep": {
@@ -1853,7 +1853,7 @@
           "immediateMin": 1200,
           "immediateMax": 1800,
           "recastTimer": 16,
-          "stormcallerHint": "Tail-sweep style backline punishment if anyone is too close behind.",
+          "raidnightHint": "Tail-sweep style backline punishment if anyone is too close behind.",
           "wowAnalog": "Tail Sweep"
         },
         "skeletal_downpour": {
@@ -1867,7 +1867,7 @@
           "immediateMin": 1200,
           "immediateMax": 1800,
           "recastTimer": 15,
-          "stormcallerHint": "Rain of Bones room-wide hit that sets up add spawns.",
+          "raidnightHint": "Rain of Bones room-wide hit that sets up add spawns.",
           "wowAnalog": "Rain of Bones"
         },
         "cinder_spit": {
@@ -1881,7 +1881,7 @@
           "immediateMin": 2000,
           "immediateMax": 3000,
           "recastTimer": 7,
-          "stormcallerHint": "Smoking Blast style repeated ranged bombardment while airborne.",
+          "raidnightHint": "Smoking Blast style repeated ranged bombardment while airborne.",
           "wowAnalog": "Smoking Blast"
         },
         "gravebound_remnants": {
@@ -1899,7 +1899,7 @@
           "tickEffect": null,
           "recastTimer": 18,
           "targetType": "self",
-          "stormcallerHint": "Skeleton adds during the air phase.",
+          "raidnightHint": "Skeleton adds during the air phase.",
           "wowAnalog": "Restless Skeletons"
         }
       }

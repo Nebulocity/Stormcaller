@@ -4,6 +4,8 @@ export default defineConfig({
   // Serve from the project root
   root: '.',
 
+  base: '/Raid-Night/',
+
   // Where Vite looks for the entry index.html
   publicDir: 'public',
 

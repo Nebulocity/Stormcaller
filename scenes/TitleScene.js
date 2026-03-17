@@ -1,7 +1,7 @@
 /**
  * TitleScene.js
  *
- * Entry point scene for Stormcaller.
+ * Entry point scene for Raid Night.
  * Shows the title screen and routes to raid selection.
  */
 import { loadSaveData, resetSaveData, saveSaveData } from '../utils/saveData.js';
@@ -12,13 +12,13 @@ export default class TitleScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('bg_stormcaller', 'sprites/bg_stormcaller.png');
+    this.load.image('bg_raidnight', 'sprites/bg_raidnight.png');
   }
 
   create() {
   const { WIDTH, HEIGHT, TICK_MS } = window.GAME_CONFIG;
   this._drawBackground('screen_title', WIDTH, HEIGHT);
-  this.add.image(0, 0, 'bg_stormcaller').setOrigin(0, 0);
+  this.add.image(0, 0, 'bg_raidnight').setOrigin(0, 0);
 
   const saveData = loadSaveData();
   this.registry.set('saveData', saveData);
