@@ -1,13 +1,14 @@
 {
-  "name": "stormcaller",
+  "name": "raid-night",
   "version": "0.1.0",
-  "description": "Stormcaller — a TBC Shaman raid boss game built with Phaser 3",
+  "description": "Raid Night — a TBC Shaman raid boss game built with Phaser 3",
   "scripts": {
-    "dev":   "vite",
+    "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "gh-pages": "^6.3.0",
     "phaser": "^3.90.0"
   },
   "devDependencies": {
