@@ -90,7 +90,7 @@ export default class BossLoadingScene extends Phaser.Scene {
     this.registry.set('levelData', levelData || this.cache.json.get('level01'));
 
     // Stop any running UIScene before relaunching for this encounter
-    this.time.delayedCall(200, () => {
+    this.time.delayedCall(1500, () => {
       if (this.scene.isActive('UIScene')) {
         this.scene.stop('UIScene');
       }
