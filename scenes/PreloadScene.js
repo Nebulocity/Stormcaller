@@ -121,16 +121,16 @@ export default class PreloadScene extends Phaser.Scene {
 
     // ---- The Demon Basement ----
     this.load.spritesheet('boss_magtheridax_idle',      'assets/raids/the_demon_basement/bosses/idle/boss_magtheridax_idle.png',           { frameWidth: 384, frameHeight: 384 });
-    this.load.spritesheet('boss_magtheridax_attacking', 'assets/raids/the_demon_basement/bosses/attacking/boss_magtheridax_attacking.png',  { frameWidth: 384, frameHeight: 384 });
-    this.load.spritesheet('boss_magtheridax_defeated',  'assets/raids/the_demon_basement/bosses/defeated/boss_magtheridax_defeated.png',   { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('boss_magtheridax_attacking', 'assets/raids/the_demon_basement/bosses/attacking/boss_magtheridax_attacking.png',  { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('boss_magtheridax_defeated',  'assets/raids/the_demon_basement/bosses/defeated/boss_magtheridax_defeated.png',   { frameWidth: 384, frameHeight: 384 });
 
     // ---- The Cracked Mountain ----
     this.load.spritesheet('boss_high_chief_bonkgar_idle',      'assets/raids/the_cracked_mountain/bosses/idle/boss_high_chief_bonkgar_idle.png',           { frameWidth: 384, frameHeight: 384 });
-    this.load.spritesheet('boss_high_chief_bonkgar_attacking', 'assets/raids/the_cracked_mountain/bosses/attacking/boss_high_chief_bonkgar_attacking.png',  { frameWidth: 384, frameHeight: 384 });
-    this.load.spritesheet('boss_high_chief_bonkgar_defeated',  'assets/raids/the_cracked_mountain/bosses/defeated/boss_high_chief_bonkgar_defeated.png',   { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('boss_high_chief_bonkgar_attacking', 'assets/raids/the_cracked_mountain/bosses/attacking/boss_high_chief_bonkgar_attacking.png',  { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('boss_high_chief_bonkgar_defeated',  'assets/raids/the_cracked_mountain/bosses/defeated/boss_high_chief_bonkgar_defeated.png',   { frameWidth: 384, frameHeight: 384 });
     this.load.spritesheet('boss_grull_idle',      'assets/raids/the_cracked_mountain/bosses/idle/boss_grull_the_wyrm_whacker_idle.png',           { frameWidth: 384, frameHeight: 384 });
-    this.load.spritesheet('boss_grull_attacking', 'assets/raids/the_cracked_mountain/bosses/attacking/boss_grull_the_wyrm_whacker_attacking.png',  { frameWidth: 384, frameHeight: 384 });
-    this.load.spritesheet('boss_grull_defeated',  'assets/raids/the_cracked_mountain/bosses/defeated/boss_grull_the_wyrm_whacker_defeated.png',   { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('boss_grull_attacking', 'assets/raids/the_cracked_mountain/bosses/attacking/boss_grull_the_wyrm_whacker_attacking.png',  { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('boss_grull_defeated',  'assets/raids/the_cracked_mountain/bosses/defeated/boss_grull_the_wyrm_whacker_defeated.png',   { frameWidth: 384, frameHeight: 384 });
 
     // ---- Spookspire Keep ----
     this.load.spritesheet('boss_sir_trotsalot_idle',      'assets/raids/spookspire_keep/bosses/idle/boss_sir_trotsalot_idle.png',           { frameWidth: 384, frameHeight: 384 });
