@@ -46,7 +46,6 @@ export default class RaidSelectScene extends Phaser.Scene {
       { x: WIDTH * 0.70, y: newBottomY },
     ];
 
-
     RAID_ORDER.forEach((raidId, index) => {
       const raid = RAID_CATALOG[raidId];
       const unlocked = saveData.unlockedRaidIds.includes(raidId);
