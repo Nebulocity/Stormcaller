@@ -78,33 +78,33 @@ const THE_CHURNING_CORE = {
 // One boss: Magtheridax the Frustrated. Always unlocked.
 // ============================================================
 
-const THE_DEMON_BASEMENT = {
-  id:              'the_demon_basement',
+const the_basement_demon = {
+  id:              'the_basement_demon',
   name:            'The Basement Demon',
-  buttonKey:       'button_the_demon_basement',
-  buttonPath:      raidAssetPath('the_demon_basement', 'button_the_basement_demon.png'),
+  buttonKey:       'button_the_basement_demon',
+  buttonPath:      raidAssetPath('the_basement_demon', 'button_the_basement_demon.png'),
   bannerKey:       'banner_the_basement_demon',
-  bannerPath:      raidAssetPath('the_demon_basement', 'banner_the_basement_demon.png'),
-  backgroundKey:   'bg_the_demon_basement',
-  backgroundPath:  raidAssetPath('the_demon_basement', 'bg_the_basement_demon.png'),
+  bannerPath:      raidAssetPath('the_basement_demon', 'banner_the_basement_demon.png'),
+  backgroundKey:   'bg_the_basement_demon',
+  backgroundPath:  raidAssetPath('the_basement_demon', 'bg_the_basement_demon.png'),
   bosses: [
     {
       id:                       'magtheridax',
       name:                     'Magtheridax the Frustrated',
       buttonKey:                'button_boss_magtheridax',
-      buttonPath:               raidAssetPath('the_demon_basement', 'buttons/button_magtheridax.png'),
+      buttonPath:               raidAssetPath('the_basement_demon', 'buttons/button_magtheridax.png'),
       splashKey:                'splash_magtheridax',
-      splashPath:               raidAssetPath('the_demon_basement', 'bosses/splash/boss_magtheridax.png'),
-      encounterBackgroundKey:   'bg_the_demon_basement',
-      encounterBackgroundPath:  raidAssetPath('the_demon_basement', 'backgrounds/bg_the_demon_basement.png'),
+      splashPath:               raidAssetPath('the_basement_demon', 'bosses/splash/boss_magtheridax.png'),
+      encounterBackgroundKey:   'bg_the_basement_demon',
+      encounterBackgroundPath:  raidAssetPath('the_basement_demon', 'backgrounds/bg_the_basement_demon.png'),
       idleKey:                  'boss_magtheridax_idle',
-      idlePath:                 raidAssetPath('the_demon_basement', 'bosses/idle/boss_magtheridax_idle.png'),
+      idlePath:                 raidAssetPath('the_basement_demon', 'bosses/idle/boss_magtheridax_idle.png'),
       attackingKey:             'boss_magtheridax_attacking',
-      attackingPath:            raidAssetPath('the_demon_basement', 'bosses/attacking/boss_magtheridax_attacking.png'),
+      attackingPath:            raidAssetPath('the_basement_demon', 'bosses/attacking/boss_magtheridax_attacking.png'),
       defeatedKey:              'boss_magtheridax_defeated',
-      defeatedPath:             raidAssetPath('the_demon_basement', 'bosses/defeated/boss_magtheridax_defeated.png'),
+      defeatedPath:             raidAssetPath('the_basement_demon', 'bosses/defeated/boss_magtheridax_defeated.png'),
       levelKey:                 'level_magtheridax',
-      levelPath:                'data/the_demon_basement/magtheridax.json',
+      levelPath:                'data/the_basement_demon/magtheridax.json',
       unlockedBy:               [],
     },
   ],
@@ -398,7 +398,7 @@ const SPOOKSPIRE_KEEP = {
 // RAID_CATALOG: access any raid by its id
 export const RAID_CATALOG = {
   the_churning_core:     THE_CHURNING_CORE,
-  the_demon_basement:    THE_DEMON_BASEMENT,
+  the_basement_demon:    the_basement_demon,
   the_cracked_mountain:  THE_CRACKED_MOUNTAIN,
   spookspire_keep:       SPOOKSPIRE_KEEP,
 };
@@ -408,5 +408,5 @@ export const RAID_ORDER = [
   'the_churning_core',
   'spookspire_keep',  
   'the_cracked_mountain',
-  'the_demon_basement',
+  'the_basement_demon',
 ];
