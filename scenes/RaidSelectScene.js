@@ -20,7 +20,8 @@ export default class RaidSelectScene extends Phaser.Scene {
 
     this.add.image(WIDTH / 2, HEIGHT / 2, 'bg_raidnight')
       .setDisplaySize(WIDTH, HEIGHT)
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setScale(.25);
 
     this.add.text(WIDTH / 2, HEIGHT * 0.08, 'Choose Your Raid!', {
       fontFamily: 'monospace',
@@ -56,86 +57,96 @@ export default class RaidSelectScene extends Phaser.Scene {
   }
 
   _createRaidButton(x, y, raid, unlocked, saveData) {
-    
-    const alpha = unlocked ? 1 : 0.42;
+  const alpha = unlocked ? 1 : 0.42;
 
-    const panel = this.add.rectangle(x, y, 360, 300, 0x1b110d, 0.90)
-      .setStrokeStyle(8, unlocked ? 0xd79f4e : 0x666666, 1)
-      .setAlpha(alpha)
-      .setInteractive(unlocked ? { useHandCursor: true } : undefined);
+  // Create panel
+  const panel = this.add.rectangle(x, y, 360, 300, 0x1b110d, 0.90)
+    .setStrokeStyle(8, unlocked ? 0xd79f4e : 0x666666, 1)
+    .setAlpha(alpha)
+    .setInteractive(unlocked ? { useHandCursor: true } : undefined);
 
-    const width = 64;
-    const height = 64;
+  const width = panel.width;
+  const height = panel.height;
 
-    const icon = this.add.image(x, y - height * 0.22, raid.buttonKey)
+  // Add the raid banner above the panel
+  const banner = this.add.image(x, y - height * 0.62, raid.bannerKey)
     .setOrigin(0.5)
     .setAlpha(alpha);
 
-    // const icon = this.add.image(x, y - 20, raid.buttonKey)
-    // .setOrigin(0.5)
-    // .setAlpha(alpha)
-    // .setScale(3.2);
+  // Scale banner to match panel width
+  const bannerScale = (width * 0.9) / banner.width;
+  banner.setScale(bannerScale);
 
-    // this.add.text(x, y + 98, raid.name, {
-    //   fontFamily: 'monospace',
-    //   fontSize: '42px',
-    //   color: unlocked ? '#fff0c9' : '#999999',
-    //   stroke: '#000000',
-    //   strokeThickness: 5,
-    //   align: 'center',
-    //   wordWrap: { width: width - 40 },
-    // }).setOrigin(0.5);
+  // Icon (centered inside panel)
+  const icon = this.add.image(x, y - height * 0.22, raid.buttonKey)
+    .setOrigin(0.5)
+    .setAlpha(alpha);
 
-    if (!unlocked) {
-      this.add.text(x, y + 132, 'Locked', {
-        fontFamily: 'monospace',
-        fontSize: '20px',
-        color: '#bbbbbb',
-        stroke: '#000000',
-        strokeThickness: 4,
-      }).setOrigin(0.5);
-      return;
-    }
-  
-    // Hover effect on buttons
-    panel.on('pointerover', () => panel.setStrokeStyle(8, 0xffd37a, 1));
-    panel.on('pointerout', () => panel.setStrokeStyle(8, 0xd79f4e, 1));
-
-    // Click effect on pressing a button
-    panel.on('pointerdown', () => {
-      
-      // Flash the button
-      this.tweens.add({ targets: panel, scaleX: 0.98, scaleY: 0.98, duration: 90, yoyo: true });
-
-      // Set and save the selected raid (in case of a wipe)
-      const nextSave = { ...saveData, lastSelectedRaidId: raid.id };
-      saveSaveData(nextSave);     
-      this.registry.set('saveData', nextSave);
-      this.registry.set('selectedRaidId', raid.id);
-
-      // Create the screen flash
-      const flash = this.add.rectangle(x, y, width, height, 0xffffff, 1)
-        .setOrigin(0.5)
-        .setDepth(9999)
-        .setAlpha(0);
-
-      // Add flash to tween
-      this.tweens.add({
-        targets: flash,
-        alpha: { from: 0, to: 1 },
-        duration: 80,
-        yoyo: true,
-        ease: 'Quad.easeOut',
-        onComplete: () => flash.destroy()
-      });
-                      
-      // Camera fades out
-      this.cameras.main.fadeOut(1000, 0, 0, 0);
-      this.time.delayedCall(500, () => {
-        this.scene.start('RaidBossSelectScene');
-      });
-    });
+  // Show locked/unlocked
+  if (!unlocked) {
+    this.add.text(x, y + height * 0.33, 'Locked', {
+      fontFamily: 'monospace',
+      fontSize: '20px',
+      color: '#bbbbbb',
+      stroke: '#000000',
+      strokeThickness: 4,
+    }).setOrigin(0.5);
+    return;
   }
+
+  // Hover effect
+  panel.on('pointerover', () => panel.setStrokeStyle(8, 0xffd37a, 1));
+  panel.on('pointerout', () => panel.setStrokeStyle(8, 0xd79f4e, 1));
+
+  // Click effect
+  panel.on('pointerdown', () => {
+
+    // Press animation
+    this.tweens.add({
+      targets: panel,
+      scaleX: 0.98,
+      scaleY: 0.98,
+      duration: 90,
+      yoyo: true
+    });
+
+    // Save selection
+    const nextSave = { ...saveData, lastSelectedRaidId: raid.id };
+    saveSaveData(nextSave);
+    this.registry.set('saveData', nextSave);
+    this.registry.set('selectedRaidId', raid.id);
+
+    // Flash overlay sized to panel
+    const flash = this.add.rectangle(x, y, width, height, 0xffffff, 1)
+      .setOrigin(0.5)
+      .setDepth(9999)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: flash,
+      alpha: { from: 0, to: 1 },
+      duration: 80,
+      yoyo: true,
+      ease: 'Quad.easeOut',
+      onComplete: () => flash.destroy()
+    });
+
+    // Fade out banner + icon with the panel
+    this.tweens.add({
+      targets: [panel, banner, icon],
+      alpha: 0,
+      duration: 300,
+      ease: 'Quad.easeOut'
+    });
+
+    // Camera fade
+    this.cameras.main.fadeOut(1000, 0, 0, 0);
+    this.time.delayedCall(500, () => {
+      this.scene.start('RaidBossSelectScene');
+    });
+  });
+}
+
 
   _drawRaidWipeZone(saveData) {
     const { WIDTH, HEIGHT } = window.GAME_CONFIG;
@@ -143,7 +154,7 @@ export default class RaidSelectScene extends Phaser.Scene {
     this.add.rectangle(WIDTH / 2, HEIGHT * 0.95, WIDTH, HEIGHT * 0.10, 0x000000, 0.55)
       .setOrigin(0.5);
 
-    this.add.text(WIDTH / 2, HEIGHT * 0.95, 'Raid Wipe Tokens Left: ' + saveData.raidWipeTokensLeft, {
+    this.add.text(WIDTH / 2, HEIGHT * 0.50, 'Raid Wipe Tokens Left: ' + saveData.raidWipeTokensLeft, {
       fontFamily: 'monospace',
       fontSize: '64px',
       color: '#f3e6c2',
