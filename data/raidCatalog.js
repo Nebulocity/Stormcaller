@@ -46,6 +46,8 @@ const THE_CHURNING_CORE = {
   name:            'The Churning Core',
   buttonKey:       'button_the_churning_core',
   buttonPath:      raidAssetPath('the_churning_core', 'button_the_churning_core.png'),
+  bannerKey:       'banner_the_churning_core',
+  bannerPath:      raidAssetPath('the_churning_core', 'banner_banner_the_churning_core.png'),
   backgroundKey:   'bg_the_churning_core',
   backgroundPath:  raidAssetPath('the_churning_core', 'bg_the_churning_core.png'),
   bosses: [
@@ -78,11 +80,13 @@ const THE_CHURNING_CORE = {
 
 const THE_DEMON_BASEMENT = {
   id:              'the_demon_basement',
-  name:            'The Demon Basement',
+  name:            'The Basement Demon',
   buttonKey:       'button_the_demon_basement',
-  buttonPath:      raidAssetPath('the_demon_basement', 'button_the_demon_basement.png'),
+  buttonPath:      raidAssetPath('the_demon_basement', 'button_the_basement_demon.png'),
+  bannerKey:       'banner_the_basement_demon',
+  bannerPath:      raidAssetPath('the_demon_basement', 'banner_the_basement_demon.png'),
   backgroundKey:   'bg_the_demon_basement',
-  backgroundPath:  raidAssetPath('the_demon_basement', 'bg_the_demon_basement.png'),
+  backgroundPath:  raidAssetPath('the_demon_basement', 'bg_the_basement_demon.png'),
   bosses: [
     {
       id:                       'magtheridax',
@@ -117,9 +121,11 @@ const THE_CRACKED_MOUNTAIN = {
   id:              'the_cracked_mountain',
   name:            'The Cracked Mountain',
   buttonKey:       'button_the_cracked_mountain',
-  buttonPath:      raidAssetPath('the_cracked_mountain', 'button_the_churning_core.png'), // TODO: rename file to button_the_cracked_mountain.png,
+  buttonPath:      raidAssetPath('the_cracked_mountain', 'button_the_cracked_mountain.png'),
+  bannerKey:       'banner_the_cracked_mountain',
+  bannerPath:      raidAssetPath('the_cracked_mountain', 'banner_the_cracked_mountain.png'),
   backgroundKey:   'bg_the_cracked_mountain',
-  backgroundPath:  raidAssetPath('the_cracked_mountain', 'bg_the_churning_core.png'),  // TODO: rename file to bg_the_cracked_mountain.png,
+  backgroundPath:  raidAssetPath('the_cracked_mountain', 'bg_the_cracked_mountain.png'),
   bosses: [
     {
       id:                       'high_chief_bonkgar',
@@ -187,6 +193,8 @@ const SPOOKSPIRE_KEEP = {
   name:            'Spookspire Keep',
   buttonKey:       'button_spookspire_keep',
   buttonPath:      raidAssetPath('spookspire_keep', 'button_spookspire_keep.png'),
+  bannerKey:       'banner_spookspire_keep',
+  bannerPath:      raidAssetPath('spookspire_keep', 'banner_spookspire_keep.png'),
   backgroundKey:   'bg_spookspire_keep',
   backgroundPath:  raidAssetPath('spookspire_keep', 'bg_spookspire_keep.png'),
   bosses: [
