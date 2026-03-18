@@ -56,8 +56,8 @@ export default class RaidSelectScene extends Phaser.Scene {
   }
 
   _createRaidButton(x, y, raid, unlocked, saveData) {
-    const width = 360;
-    const height = 300;
+    // const width = 360;
+    // const height = 300;
     const alpha = unlocked ? 1 : 0.42;
 
     const panel = this.add.rectangle(x, y, width, height, 0x1b110d, 0.90)
@@ -65,20 +65,27 @@ export default class RaidSelectScene extends Phaser.Scene {
       .setAlpha(alpha)
       .setInteractive(unlocked ? { useHandCursor: true } : undefined);
 
-    const icon = this.add.image(x, y - 20, raid.buttonKey)
-    .setOrigin(0.5)
-    .setAlpha(alpha)
-    .setScale(3.2);
+    const width = panel.width;
+    const height = panel.height;
 
-    this.add.text(x, y + 98, raid.name, {
-      fontFamily: 'monospace',
-      fontSize: '42px',
-      color: unlocked ? '#fff0c9' : '#999999',
-      stroke: '#000000',
-      strokeThickness: 5,
-      align: 'center',
-      wordWrap: { width: width - 40 },
-    }).setOrigin(0.5);
+    const icon = this.add.image(x, y - height * 0.22, raid.buttonKey)
+    .setOrigin(0.5)
+    .setAlpha(alpha);
+
+    // const icon = this.add.image(x, y - 20, raid.buttonKey)
+    // .setOrigin(0.5)
+    // .setAlpha(alpha)
+    // .setScale(3.2);
+
+    // this.add.text(x, y + 98, raid.name, {
+    //   fontFamily: 'monospace',
+    //   fontSize: '42px',
+    //   color: unlocked ? '#fff0c9' : '#999999',
+    //   stroke: '#000000',
+    //   strokeThickness: 5,
+    //   align: 'center',
+    //   wordWrap: { width: width - 40 },
+    // }).setOrigin(0.5);
 
     if (!unlocked) {
       this.add.text(x, y + 132, 'Locked', {
@@ -139,7 +146,7 @@ export default class RaidSelectScene extends Phaser.Scene {
 
     this.add.text(WIDTH / 2, HEIGHT * 0.95, 'Raid Wipe Tokens Left: ' + saveData.raidWipeTokensLeft, {
       fontFamily: 'monospace',
-      fontSize: '96px',
+      fontSize: '64px',
       color: '#f3e6c2',
       stroke: '#000000',
       strokeThickness: 8,
