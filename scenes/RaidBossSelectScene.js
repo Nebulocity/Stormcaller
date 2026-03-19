@@ -14,9 +14,9 @@ import { loadSaveData, saveSaveData, isBossUnlocked } from '../utils/saveData.js
 const BOSSES_PER_ROW = 4;
 
 // Button dimensions
-const BUTTON_WIDTH   = 384;
-const BUTTON_HEIGHT  = 384;
-const BUTTON_ICON_SIZE = 384;
+const BUTTON_WIDTH   = 250;
+const BUTTON_HEIGHT  = 250;
+const BUTTON_ICON_SIZE = 250;
 
 export default class RaidBossSelectScene extends Phaser.Scene {
   constructor() {
@@ -115,10 +115,10 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     const buttonAlpha  = unlocked ? 1 : 0.42;
     const interactive  = unlocked ? { useHandCursor: true } : undefined;
 
-    const panel = this.add.rectangle(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, 0x1a100c, 0.90)
-      .setStrokeStyle(4, borderColor, 1)
-      .setAlpha(buttonAlpha)
-      .setInteractive(interactive);
+    // const panel = this.add.rectangle(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, 0x1a100c, 0.90)
+    //   .setStrokeStyle(4, borderColor, 1)
+    //   .setAlpha(buttonAlpha)
+    //   .setInteractive(interactive);
 
     this.add.image(x, y - 18, boss.buttonKey)
       .setDisplaySize(BUTTON_ICON_SIZE, BUTTON_ICON_SIZE)
@@ -153,9 +153,9 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     }
 
     // Hover / press handlers for unlocked bosses
-    panel.on('pointerover', () => panel.setStrokeStyle(4, 0xffd37a, 1));
-    panel.on('pointerout',  () => panel.setStrokeStyle(4, 0xd7a44a, 1));
-    panel.on('pointerdown', () => this._selectBoss(boss, raid, saveData));
+    // panel.on('pointerover', () => panel.setStrokeStyle(4, 0xffd37a, 1));
+    // panel.on('pointerout',  () => panel.setStrokeStyle(4, 0xd7a44a, 1));
+    // panel.on('pointerdown', () => this._selectBoss(boss, raid, saveData));
   }
 
   _selectBoss(boss, raid, saveData) {
