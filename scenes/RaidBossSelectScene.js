@@ -14,9 +14,12 @@ import { loadSaveData, saveSaveData, isBossUnlocked } from '../utils/saveData.js
 const BOSSES_PER_ROW = 4;
 
 // Button dimensions
-const BUTTON_WIDTH   = 250;
-const BUTTON_HEIGHT  = 250;
-const BUTTON_ICON_SIZE = 250;
+const BUTTON_WIDTH   = 330;
+const BUTTON_HEIGHT  = 270;
+const BUTTON_ICON_SIZE = 144;
+// const BUTTON_WIDTH   = 250;
+// const BUTTON_HEIGHT  = 250;
+// const BUTTON_ICON_SIZE = 250;
 
 export default class RaidBossSelectScene extends Phaser.Scene {
   constructor() {
