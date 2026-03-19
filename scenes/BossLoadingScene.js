@@ -39,7 +39,7 @@ export default class BossLoadingScene extends Phaser.Scene {
 
     let bossSprite = null;
     if (idleKey && this.textures.exists(idleKey)) {
-      bossSprite = this.add.sprite(cx, bossY, idleKey).setOrigin(0.5);
+      bossSprite = this.add.sprite(cx, bossY, idleKey).setOrigin(0.5).setScale(2);
 
       const animKey = 'bossloading_idle_' + idleKey;
       if (!this.anims.exists(animKey)) {
@@ -69,7 +69,7 @@ export default class BossLoadingScene extends Phaser.Scene {
     // Loading bar (mirroring PreloadScene style)
     const barW  = 500;
     const barH  = 16;
-    const barY  = HEIGHT * 0.78;
+    const barY  = HEIGHT * 0.5;
     const barX  = cx - barW / 2;
     console.log('cx: ', cx, 'barW: ',barW, 'barX: ', barX);
 
