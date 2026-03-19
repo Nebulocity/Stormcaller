@@ -33,16 +33,17 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     this.registry.set('saveData', saveData);
     this.registry.set('selectedRaidId', raid.id);
 
-    // Background
-    this.add.image(WIDTH / 2, HEIGHT / 2, raid.backgroundKey)
-      .setDisplaySize(WIDTH, HEIGHT)
+    // Black base
+    this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000);
+
+    // Raid background centered, natural size
+    const bg = this.add.image(WIDTH / 2, HEIGHT / 2, raid.backgroundKey)
       .setOrigin(0.5);
 
-    // Raid name header
-    this.add.rectangle(WIDTH / 2, HEIGHT * 0.075, WIDTH, HEIGHT * 0.15, 0x000000, 0.32)
-      .setOrigin(0.5);
+    const bgTop = HEIGHT / 2 - bg.displayHeight / 2;
 
-    this.add.text(WIDTH / 2, HEIGHT * 0.08, raid.name, {
+    // Raid name just above the background
+    this.add.text(WIDTH / 2, bgTop - 48, raid.name, {
       fontFamily:      'monospace',
       fontSize:        '54px',
       color:           '#fff1c7',
@@ -50,8 +51,26 @@ export default class RaidBossSelectScene extends Phaser.Scene {
       strokeThickness: 8,
     }).setOrigin(0.5);
 
+    // Blinking wipe token line just above the raid name
+    const saveData2 = saveData; // alias for clarity in closure
+    const tokenText = this.add.text(WIDTH / 2, bgTop - 104, 'Raid Wipe Tokens Left: ' + saveData2.raidWipeTokensLeft, {
+      fontFamily:      'monospace',
+      fontSize:        '34px',
+      color:           '#f3e6c2',
+      stroke:          '#000000',
+      strokeThickness: 6,
+    }).setOrigin(0.5);
+
+    this.tweens.add({
+      targets:  tokenText,
+      alpha:    { from: 1, to: 0.15 },
+      duration: 750,
+      yoyo:     true,
+      repeat:   -1,
+      ease:     'Sine.easeInOut',
+    });
+
     this._drawBossGrid(raid, saveData);
-    this._drawWipeTokenFooter(saveData);
   }
 
   // ============================================================
@@ -102,6 +121,61 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     this.add.image(x, y - 18, boss.buttonKey)
       .setDisplaySize(BUTTON_ICON_SIZE, BUTTON_ICON_SIZE)
       .setOrigin(0.5)
+      .setAlpha(buttonAlpha);
+
+    this.add.text(x, y + 52, boss.name, {
+      fontFamily:      'monospace',
+      fontSize:        '19px',
+      color:           textColor,
+      stroke:          '#000000',
+      strokeThickness: 5,
+      align:           'center',
+      wordWrap:        { width: BUTTON_WIDTH - 40 },
+    }).setOrigin(0.5);
+
+    // Show unlock hint for locked bosses
+    if (!unlocked) {
+      const requiredNames = boss.unlockedBy
+        .map(reqId => raid.bosses.find(b => b.id === reqId)?.name || reqId)
+        .join(', ');
+      this.add.text(x, y + 78, 'Defeat: ' + requiredNames, {
+        fontFamily:      'monospace',
+        fontSize:        '14px',
+        color:           '#888888',
+        stroke:          '#000000',
+        strokeThickness: 3,
+        align:           'center',
+        wordWrap:        { width: BUTTON_WIDTH - 20 },
+      }).setOrigin(0.5);
+      return;
+    }
+
+    // Hover / press handlers for unlocked bosses
+    panel.on('pointerover', () => panel.setStrokeStyle(4, 0xffd37a, 1));
+    panel.on('pointerout',  () => panel.setStrokeStyle(4, 0xd7a44a, 1));
+    panel.on('pointerdown', () => this._selectBoss(boss, raid, saveData));
+  }
+
+  _selectBoss(boss, raid, saveData) {
+    const updatedSave = {
+      ...saveData,
+      lastSelectedRaidId: raid.id,
+      lastSelectedBossId: boss.id,
+    };
+
+    saveSaveData(updatedSave);
+    this.registry.set('saveData',        updatedSave);
+    this.registry.set('selectedRaidId',  raid.id);
+    this.registry.set('selectedBossId',  boss.id);
+    this.registry.set('selectedBossMeta', boss);
+
+    this.cameras.main.fadeOut(300, 0, 0, 0);
+    this.time.delayedCall(320, () => {
+      this.scene.start('BossLoadingScene');
+    });
+  }
+
+}
       .setAlpha(buttonAlpha);
 
     this.add.text(x, y + 52, boss.name, {
