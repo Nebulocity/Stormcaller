@@ -10,16 +10,8 @@ const Phaser = window.Phaser; // Phaser is loaded via <script> in index.html
 import { RAID_CATALOG }                    from '../data/raidCatalog.js';
 import { loadSaveData, saveSaveData, isBossUnlocked } from '../utils/saveData.js';
 
-// How many boss buttons to place per row
-const BOSSES_PER_ROW = 4;
-
-// Button dimensions
-const BUTTON_WIDTH   = 330;
-const BUTTON_HEIGHT  = 270;
-const BUTTON_ICON_SIZE = 144;
-// const BUTTON_WIDTH   = 250;
-// const BUTTON_HEIGHT  = 250;
-// const BUTTON_ICON_SIZE = 250;
+const BOSSES_PER_ROW  = 3;
+const BUTTON_SIZE     = 280;   // square — buttons are the artwork, no panel needed
 
 export default class RaidBossSelectScene extends Phaser.Scene {
   constructor() {
@@ -54,9 +46,8 @@ export default class RaidBossSelectScene extends Phaser.Scene {
       strokeThickness: 8,
     }).setOrigin(0.5);
 
-    // Blinking wipe token line just above the raid name
-    const saveData2 = saveData; // alias for clarity in closure
-    const tokenText = this.add.text(WIDTH / 2, bgTop - 104, 'Raid Wipe Tokens Left: ' + saveData2.raidWipeTokensLeft, {
+    // Blinking wipe token line
+    const tokenText = this.add.text(WIDTH / 2, bgTop - 104, 'Raid Wipe Tokens Left: ' + saveData.raidWipeTokensLeft, {
       fontFamily:      'monospace',
       fontSize:        '34px',
       color:           '#f3e6c2',
@@ -84,10 +75,9 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     const { WIDTH, HEIGHT } = window.GAME_CONFIG;
 
     const gridTop    = HEIGHT * 0.15;
-    const gridHeight = HEIGHT * 0.75;
+    const gridHeight = HEIGHT * 0.80;
     const bosses     = raid.bosses.slice();
 
-    // Split bosses into rows
     const rows = [];
     bosses.forEach((boss, index) => {
       const rowIndex = Math.floor(index / BOSSES_PER_ROW);
@@ -99,13 +89,11 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     const rowGap   = gridHeight / (rowCount + 1);
 
     rows.forEach((rowBosses, rowIndex) => {
-      const colGap = WIDTH / (rowBosses.length + 1);
+      const colGap  = WIDTH / (rowBosses.length + 1);
       const buttonY = gridTop + rowGap * (rowIndex + 1);
 
       rowBosses.forEach((boss, colIndex) => {
-        const buttonX = colGap * (colIndex + 1);
-
-        // TODO: return this back to isBossUnlocked() after testing!
+        const buttonX  = colGap * (colIndex + 1);
         const unlocked = true; // isBossUnlocked(saveData, raid.id, boss.id);
         this._drawBossButton(buttonX, buttonY, boss, raid, saveData, unlocked);
       });
@@ -113,52 +101,64 @@ export default class RaidBossSelectScene extends Phaser.Scene {
   }
 
   _drawBossButton(x, y, boss, raid, saveData, unlocked) {
-    const borderColor  = unlocked ? 0xd7a44a : 0x666666;
-    const textColor    = unlocked ? '#fff1c7' : '#9e9e9e';
-    const buttonAlpha  = unlocked ? 1 : 0.42;
-    const interactive  = unlocked ? { useHandCursor: true } : undefined;
+    const alpha = unlocked ? 1 : 0.35;
 
-    // const panel = this.add.rectangle(x, y, BUTTON_WIDTH, BUTTON_HEIGHT, 0x1a100c, 0.90)
-    //   .setStrokeStyle(4, borderColor, 1)
-    //   .setAlpha(buttonAlpha)
-    //   .setInteractive(interactive);
-
-    this.add.image(x, y - 18, boss.buttonKey)
-      .setDisplaySize(BUTTON_ICON_SIZE, BUTTON_ICON_SIZE)
+    const icon = this.add.image(x, y, boss.buttonKey)
       .setOrigin(0.5)
-      .setAlpha(buttonAlpha);
+      .setDisplaySize(BUTTON_SIZE, BUTTON_SIZE)
+      .setAlpha(alpha);
 
-    this.add.text(x, y + 52, boss.name, {
+    // Boss name below the icon
+    const nameText = this.add.text(x, y + BUTTON_SIZE * 0.52, boss.name, {
       fontFamily:      'monospace',
-      fontSize:        '19px',
-      color:           textColor,
+      fontSize:        '22px',
+      color:           unlocked ? '#fff1c7' : '#888888',
       stroke:          '#000000',
       strokeThickness: 5,
       align:           'center',
-      wordWrap:        { width: BUTTON_WIDTH - 40 },
+      wordWrap:        { width: BUTTON_SIZE },
     }).setOrigin(0.5);
 
-    // Show unlock hint for locked bosses
+    // Unlock hint for locked bosses
     if (!unlocked) {
       const requiredNames = boss.unlockedBy
         .map(reqId => raid.bosses.find(b => b.id === reqId)?.name || reqId)
         .join(', ');
-      this.add.text(x, y + 78, 'Defeat: ' + requiredNames, {
+      this.add.text(x, y + BUTTON_SIZE * 0.52 + 32, 'Defeat: ' + requiredNames, {
         fontFamily:      'monospace',
-        fontSize:        '14px',
-        color:           '#888888',
+        fontSize:        '16px',
+        color:           '#666666',
         stroke:          '#000000',
         strokeThickness: 3,
         align:           'center',
-        wordWrap:        { width: BUTTON_WIDTH - 20 },
+        wordWrap:        { width: BUTTON_SIZE },
       }).setOrigin(0.5);
       return;
     }
 
-    // Hover / press handlers for unlocked bosses
-    // panel.on('pointerover', () => panel.setStrokeStyle(4, 0xffd37a, 1));
-    // panel.on('pointerout',  () => panel.setStrokeStyle(4, 0xd7a44a, 1));
-    // panel.on('pointerdown', () => this._selectBoss(boss, raid, saveData));
+    icon.setInteractive({ useHandCursor: true });
+
+    // Hover: brighten with tint
+    icon.on('pointerover', () => {
+      icon.setTint(0xffd37a);
+      nameText.setColor('#ffd37a');
+    });
+    icon.on('pointerout', () => {
+      icon.clearTint();
+      nameText.setColor('#fff1c7');
+    });
+
+    // Click: quick scale pulse then select
+    icon.on('pointerdown', () => {
+      this.tweens.add({
+        targets:  icon,
+        scaleX:   (BUTTON_SIZE * 0.93) / icon.width,
+        scaleY:   (BUTTON_SIZE * 0.93) / icon.height,
+        duration: 80,
+        yoyo:     true,
+        onComplete: () => this._selectBoss(boss, raid, saveData),
+      });
+    });
   }
 
   _selectBoss(boss, raid, saveData) {
@@ -169,9 +169,9 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     };
 
     saveSaveData(updatedSave);
-    this.registry.set('saveData',        updatedSave);
-    this.registry.set('selectedRaidId',  raid.id);
-    this.registry.set('selectedBossId',  boss.id);
+    this.registry.set('saveData',         updatedSave);
+    this.registry.set('selectedRaidId',   raid.id);
+    this.registry.set('selectedBossId',   boss.id);
     this.registry.set('selectedBossMeta', boss);
 
     this.cameras.main.fadeOut(300, 0, 0, 0);
@@ -179,5 +179,4 @@ export default class RaidBossSelectScene extends Phaser.Scene {
       this.scene.start('BossLoadingScene');
     });
   }
-
 }
