@@ -179,4 +179,38 @@ export default class RaidBossSelectScene extends Phaser.Scene {
       this.scene.start('BossLoadingScene');
     });
   }
+  _drawBackButton() {
+    const { HEIGHT } = window.GAME_CONFIG;
+
+    // Text-based back button - replace with sprite version later
+    const btn = this.add.text(80, HEIGHT * 0.96, '< BACK', {
+      fontFamily: 'monospace',
+      fontSize:   '36px',
+      color:      '#ccaa66',
+      stroke:     '#000000',
+      strokeThickness: 4,
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    btn.on('pointerover', () => btn.setColor('#ffd37a'));
+    btn.on('pointerout',  () => btn.setColor('#ccaa66'));
+    btn.on('pointerdown', () => {
+      this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.time.delayedCall(320, () => {
+        this.scene.start('RaidSelectScene');
+      });
+    });
+
+    // Sprite-based back button (uncomment when button art is ready):
+    // const btn = this.add.image(80, HEIGHT * 0.96, 'button_back')
+    //   .setDisplaySize(120, 60)
+    //   .setOrigin(0.5)
+    //   .setInteractive({ useHandCursor: true });
+    // btn.on('pointerover', () => btn.setTint(0xffd37a));
+    // btn.on('pointerout',  () => btn.clearTint());
+    // btn.on('pointerdown', () => {
+    //   this.cameras.main.fadeOut(300, 0, 0, 0);
+    //   this.time.delayedCall(320, () => { this.scene.start('RaidSelectScene'); });
+    // });
+  }
+
 }
