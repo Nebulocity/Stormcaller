@@ -14,9 +14,9 @@ import { loadSaveData, saveSaveData, isBossUnlocked } from '../utils/saveData.js
 const BOSSES_PER_ROW = 4;
 
 // Button dimensions
-const BUTTON_WIDTH   = 220;
+const BUTTON_WIDTH   = 180;
 const BUTTON_HEIGHT  = 180;
-const BUTTON_ICON_SIZE = 96;
+const BUTTON_ICON_SIZE = 180;
 
 export default class RaidBossSelectScene extends Phaser.Scene {
   constructor() {
@@ -101,7 +101,9 @@ export default class RaidBossSelectScene extends Phaser.Scene {
 
       rowBosses.forEach((boss, colIndex) => {
         const buttonX = colGap * (colIndex + 1);
-        const unlocked = isBossUnlocked(saveData, raid.id, boss.id);
+
+        // TODO: return this back to isBossUnlocked() after testing!
+        const unlocked = true; // isBossUnlocked(saveData, raid.id, boss.id);
         this._drawBossButton(buttonX, buttonY, boss, raid, saveData, unlocked);
       });
     });
