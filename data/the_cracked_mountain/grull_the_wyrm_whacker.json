@@ -103,7 +103,7 @@
         "key": "boss_grull_the_wyrm_whacker_idle",
         "startFrame": 0,
         "endFrame": 8,
-        "frameRate": 6,
+        "frameRate": 8,
         "repeat": -1
       },
       "attack": {
