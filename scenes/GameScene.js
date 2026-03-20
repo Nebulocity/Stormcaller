@@ -446,7 +446,7 @@ export default class GameScene extends Phaser.Scene {
     const cx = zone.x + zone.w / 2;
     const cy = zone.y + zone.h - 80;
 
-    const sprite = this.add.sprite(cx, cy + 140, 'shaman_idle', 0)
+    const sprite = this.add.sprite(cx, cy, 'shaman_idle', 0)
       .setScale(1)
       .setOrigin(0.5, 1);
 
