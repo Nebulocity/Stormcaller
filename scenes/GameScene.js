@@ -1414,50 +1414,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     // ========================
-    // Wrath of Ragnaros
-    // ========================
-    if (abilityId === 'wrath_of_ragnaros') {
-      this.playBossWrath();
-      // Immediate AoE damage
-      const immDmg = Phaser.Math.Between(
-        this.levelData?.abilities?.wrath_of_ragnaros?.immediateMin ?? 2500,
-        this.levelData?.abilities?.wrath_of_ragnaros?.immediateMax ?? 4500
-      );
-      ['player', 'tank', 'healer'].forEach(id => this._applyDamageToCharacter(id, immDmg, 'icon_wrath_of_ragnaros'));
-      console.log('[Boss] Wrath of Ragnaros AoE immediate:', immDmg);
-      // No tick DoT for wrath - it's handled by wrath_of_fire below
-      return;
-    }
-
-    // ========================
-    // Wrath of Fire - AoE immediate + DoT
-    // ========================
-    if (abilityId === 'wrath_of_fire') {
-      this.showAbilityDialogue(abilityId);
-      // Immediate AoE
-      const immDmg = Phaser.Math.Between(ability.immediateMin ?? 2500, ability.immediateMax ?? 4500);
-      ['player', 'tank', 'healer'].forEach(id => this._applyDamageToCharacter(id, immDmg, 'icon_wrath_of_ragnaros'));
-      console.log('[Boss] Wrath of Fire AoE immediate:', immDmg);
-      // DoT ticks
-      if (ability.duration > 0 && ability.tickMin) {
-        const tickDmg = Phaser.Math.Between(ability.tickMin, ability.tickMax);
-        let ticks = 0;
-        const dotTimer = this.time.addEvent({
-          delay:    TICK_MS,
-          loop:     true,
-          callback: () => {
-            ticks++;
-            ['player', 'tank', 'healer'].forEach(id => this._applyDamageToCharacter(id, tickDmg, 'icon_wrath_of_ragnaros'));
-            if (ticks >= ability.duration || !this.gameRunning) dotTimer.remove();
-          },
-        });
-        // Register for all targets so Rebirth clears it properly
-        ['player', 'tank', 'healer'].forEach(id => this._registerDot(id, dotTimer));
-      }
-      return;
-    }
-
-    // ========================
     // Magma Blast - single target immediate + DoT
     // ========================
     if (abilityId === 'magma_blast') {
