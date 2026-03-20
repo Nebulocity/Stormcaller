@@ -15,8 +15,8 @@
       "maxMana": 100000,
       "usesMana": false,
       "damageRange": [
-        1500,
-        2500
+        400,
+        700
       ],
       "attackSpeed": 1,
       "armor": 15000,
