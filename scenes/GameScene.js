@@ -62,7 +62,7 @@ export default class GameScene extends Phaser.Scene {
     this._buildBossSlot(ZONES.BOSS);
     this._buildPlayerSlot(ZONES.PLAYER);
     this._buildCharacterSlot('tank',   ZONES.TANK, 0xff88cc, 'Tank', 'tank_idle', 'tank_idle');
-    this._buildCharacterSlot('healer', ZONES.HEALER, 0xa0ff69, 'Healer', 'druid_idle', 'druid_idle');
+    this._buildCharacterSlot('healer', ZONES.HEALER, 0xa0ff69, 'Healer', 'healer_idle', 'healer_idle');
     this._buildTotemSlots(ZONES.TOTEMS);
 
     if (this.levelData) {
@@ -230,34 +230,34 @@ export default class GameScene extends Phaser.Scene {
     // Idle: 1024x768, 4x3 = 12 frames at 256x256
     this._safeCreateAnim({
       key:       'healer_idle',
-      frames:    anims.generateFrameNumbers('druid_idle', { start: 0, end: 11 }),
+      frames:    anims.generateFrameNumbers('healer_idle', { start: 0, end: 11 }),
       frameRate: 10,
       repeat:    -1,
-    }, 'druid_idle');
+    }, 'healer_idle');
 
-    // Druid attack
+    // Healer attack
     this._safeCreateAnim({
       key:       'healer_attack',
-      frames:    anims.generateFrameNumbers('druid_attack', { start: 0, end: 15 }),
+      frames:    anims.generateFrameNumbers('healer_attack', { start: 0, end: 15 }),
       frameRate: 12,
       repeat:    0,
-    }, 'druid_attack');
+    }, 'healer_attack');
 
     // Casting: 1024x768, 4x3 = 12 frames, plays once then returns to idle
     this._safeCreateAnim({
       key:       'healer_casting',
-      frames:    anims.generateFrameNumbers('druid_casting', { start: 0, end: 11 }),
+      frames:    anims.generateFrameNumbers('healer_casting', { start: 0, end: 11 }),
       frameRate: 12,
       repeat:    0,
-    }, 'druid_casting');
+    }, 'healer_casting');
 
     // // Hit: 1024x1024, 4x4 = 16 frames, plays once then returns to idle
     this._safeCreateAnim({
       key:       'healer_hit',
-      frames:    anims.generateFrameNumbers('druid_hit', { start: 0, end: 15 }),
+      frames:    anims.generateFrameNumbers('healer_hit', { start: 0, end: 15 }),
       frameRate: 12,
       repeat:    0,
-    }, 'druid_hit');
+    }, 'healer_hit');
 
     // =====================
     // TOTEM ANIMATIONS
@@ -280,7 +280,7 @@ export default class GameScene extends Phaser.Scene {
     // DEFEAT ANIMATIONS
     // =====================
     // Character defeat sheets - always preloaded by PreloadScene
-    ['shaman_defeated', 'druid_defeated', 'tank_defeated'].forEach(key => {
+    ['shaman_defeated', 'healer_defeated', 'tank_defeated'].forEach(key => {
       this._safeCreateAnim({
         key:       key,
         frames:    anims.generateFrameNumbers(key, { start: 0, end: 15 }),
@@ -1532,7 +1532,7 @@ export default class GameScene extends Phaser.Scene {
     // Play defeat animation, then fade out once it finishes
     const defeatKeyMap = {
       player: 'shaman_defeated',
-      healer: 'druid_defeated',
+      healer: 'healer_defeated',
       tank:   'tank_defeated',
     };
     const defeatKey = defeatKeyMap[characterId];
@@ -1668,7 +1668,7 @@ export default class GameScene extends Phaser.Scene {
 
     // Do not interrupt a cast already playing
     const current = healerSlot.sprite?.anims?.currentAnim;
-    if (current && current.key === 'druid_casting' && healerSlot.sprite.anims.isPlaying) return;
+    if (current && current.key === 'healer_casting' && healerSlot.sprite.anims.isPlaying) return;
 
     const abilities     = this.levelData?.abilities ?? {};
     const healerMaxMana = healerSlot.manaBar?.maxValue ?? 1;
@@ -2369,12 +2369,12 @@ export default class GameScene extends Phaser.Scene {
 
   playHealerHit() {
     const slot = this.entitySlots.healer;
-    if (!slot?.sprite || !this.anims.exists('druid_hit')) return;
+    if (!slot?.sprite || !this.anims.exists('healer_hit')) return;
     const current = slot.sprite.anims.currentAnim;
-    if (current && current.key === 'druid_casting' && slot.sprite.anims.isPlaying) return;
-    slot.sprite.play('druid_hit');
+    if (current && current.key === 'healer_casting' && slot.sprite.anims.isPlaying) return;
+    slot.sprite.play('healer_hit');
     slot.sprite.once('animationcomplete', () => {
-      if (this.anims.exists('druid_idle')) slot.sprite.play('druid_idle');
+      if (this.anims.exists('healer_idle')) slot.sprite.play('healer_idle');
     });
   }
 
@@ -2384,12 +2384,12 @@ export default class GameScene extends Phaser.Scene {
   // Called by combat system when the healer casts a spell.
   playHealerCast() {
     const slot = this.entitySlots.healer;
-    if (!slot?.sprite || !this.anims.exists('druid_casting')) return;
+    if (!slot?.sprite || !this.anims.exists('healer_casting')) return;
     const current = slot.sprite.anims.currentAnim;
-    if (current && current.key === 'druid_casting' && slot.sprite.anims.isPlaying) return;
-    slot.sprite.play('druid_casting');
+    if (current && current.key === 'healer_casting' && slot.sprite.anims.isPlaying) return;
+    slot.sprite.play('healer_casting');
     slot.sprite.once('animationcomplete', () => {
-      if (this.anims.exists('druid_idle')) slot.sprite.play('druid_idle');
+      if (this.anims.exists('healer_idle')) slot.sprite.play('healer_idle');
     });
   } 
 
