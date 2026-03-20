@@ -504,7 +504,7 @@ export default class GameScene extends Phaser.Scene {
     let sprite;
 
     sprite = this.add.sprite(cx, cy, spriteKey, 0)
-      .setScale(1.5)
+      .setScale(1.25)
       .setOrigin(0.5, 1);
 
     if (idleAnim && this.anims.exists(idleAnim)) {
@@ -2325,7 +2325,7 @@ export default class GameScene extends Phaser.Scene {
 
     if (!this.anims.exists('shaman_attack')) return;
 
-    slot.sprite.setScale(2).play('shaman_attack');
+    slot.sprite.setScale(1.25).play('shaman_attack');
     slot.sprite.once('animationcomplete', () => {
       if (this.anims.exists('shaman_idle')) slot.sprite.play('shaman_idle');
     });
