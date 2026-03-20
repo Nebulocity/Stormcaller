@@ -116,7 +116,7 @@ export default class BossLoadingScene extends Phaser.Scene {
 
     // Load default party data (later: coalesce with save data in create)
     if (!this.cache.json.exists('party')) {
-      this.load.json('party', 'data/party.json');
+      this.load.json('party', 'data/party/party.json');
     }
   }
 
