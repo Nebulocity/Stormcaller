@@ -14,7 +14,7 @@
       "attackHit": 90,
       "spellHit": 92,
       "attackSpeed": 2,
-      "damageRange": [118, 250],
+      "damageRange": [1200,1633],
       "actionInterval": 2,
       "blockChance": 5,
       "missChance": 5
@@ -34,8 +34,8 @@
       "armor": 14817,
       "attackHit": 88,
       "spellHit": 80,
-      "attackSpeed": 2,
-      "damageRange": [107, 212],
+      "attackSpeed": 3,
+      "damageRange": [738, 1146],
       "actionInterval": 2,
       "blockChance": 35,
       "missChance": 5
@@ -55,8 +55,8 @@
       "armor": 12256,
       "attackHit": 75,
       "spellHit": 88,
-      "attackSpeed": 3,
-      "damageRange": [200, 350],
+      "attackSpeed": 4,
+      "damageRange": [550, 717],
       "actionInterval": 1,
       "missChance": 5
     },
