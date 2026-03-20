@@ -1366,6 +1366,7 @@ export default class GameScene extends Phaser.Scene {
 
     const attackSpeed = Math.round(bossData.stats?.attackSpeed ?? 3);
     if (this.tickCount % attackSpeed === 0) {
+      console.log("[Boss] Attacking");
       this.playBossAttack();
     }
   }
