@@ -94,11 +94,11 @@ export default class PreloadScene extends Phaser.Scene {
     // this.load.spritesheet('tank_defeated', 'assets/characters/tank/character_tank_defeated.webp', { frameWidth: 384, frameHeight: 384 });
 
     // ---- Healer ----
-    this.load.spritesheet('druid_idle',     'assets/characters/healer/character_healer_idle.webp',     { frameWidth: 384, frameHeight: 384 });
-    this.load.spritesheet('druid_attack',   'assets/characters/tank/character_healer_attack.webp',   { frameWidth: 384, frameHeight: 384 });
-    // this.load.spritesheet('druid_casting',  'assets/characters/healer/character_healer_casting.webp',  { frameWidth: 384, frameHeight: 384 });
-    // this.load.spritesheet('druid_hit',      'assets/characters/healer/character_healer_hit.webp',      { frameWidth: 384, frameHeight: 384 });
-    // this.load.spritesheet('druid_defeated', 'assets/characters/healer/character_healer_defeated.webp', { frameWidth: 384, frameHeight: 384 });
+    this.load.spritesheet('healer_idle',     'assets/characters/healer/character_healer_idle.webp',     { frameWidth: 384, frameHeight: 384 });
+    this.load.spritesheet('healer_attack',   'assets/characters/tank/character_healer_attack.webp',   { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('healer_casting',  'assets/characters/healer/character_healer_casting.webp',  { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('healer_hit',      'assets/characters/healer/character_healer_hit.webp',      { frameWidth: 384, frameHeight: 384 });
+    // this.load.spritesheet('healer_defeated', 'assets/characters/healer/character_healer_defeated.webp', { frameWidth: 384, frameHeight: 384 });
 
     // ---- Totems ----
     // Might of Earth: 512x384, 4x3 = 12 frames, 128x128 each
