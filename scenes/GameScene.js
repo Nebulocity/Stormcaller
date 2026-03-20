@@ -27,9 +27,6 @@ export default class GameScene extends Phaser.Scene {
     // Tracks last cast timestamp per character for mana regen idle window
     this.lastCastTime = { player: 0, tank: 0, healer: 0 };
 
-    // True while Ragnaros is submerged - blocks auto-attacks and abilities
-    this.bossSubmerged = false;
-
     // Tracks active boss DoT timers per character so they can be cancelled
     // on death or Rebirth: { player: [timer,...], tank: [...], healer: [...] }
     this.activeDots = { player: [], tank: [], healer: [] };
@@ -988,48 +985,6 @@ export default class GameScene extends Phaser.Scene {
     if (targetId === 'healer') this.playHealerHit();
   }
 
-  playBossSubmerge(onComplete) {
-    const slot        = this.entitySlots.boss;
-    const submergeKey = this._getBossAnimKey('submerge');
-    const lavaKey     = this._getBossAnimKey('lavapool');
-    if (!slot?.sprite) return;
-
-    if (submergeKey) {
-      slot.sprite.play(submergeKey);
-      slot.sprite.once('animationcomplete', () => {
-        if (lavaKey) slot.sprite.play(lavaKey);
-        if (onComplete) onComplete();
-      });
-    } else {
-      // Fallback fade-out if no submerge anim defined
-      this.tweens.add({
-        targets: slot.sprite, alpha: 0, duration: 800,
-        onComplete: () => { if (onComplete) onComplete(); },
-      });
-    }
-  }
-
-  playBossEmerge(onComplete) {
-    const slot      = this.entitySlots.boss;
-    const emergeKey = this._getBossAnimKey('emerge');
-    const idleKey   = this._getBossAnimKey('idle');
-    if (!slot?.sprite) return;
-
-    if (emergeKey) {
-      slot.sprite.play(emergeKey);
-      slot.sprite.once('animationcomplete', () => {
-        if (idleKey) slot.sprite.play(idleKey);
-        if (onComplete) onComplete();
-      });
-    } else {
-      // Fallback fade-in if no emerge anim defined
-      this.tweens.add({
-        targets: slot.sprite, alpha: 1, duration: 800,
-        onComplete: () => { if (onComplete) onComplete(); },
-      });
-    }
-  }
-
   // ====================
   // AUDIO UNLOCK OVERLAY
   // ====================
@@ -1358,7 +1313,6 @@ export default class GameScene extends Phaser.Scene {
   // attackSpeed: 1 = every tick, 2 = every 2 ticks, 3 = every 3 ticks, etc.
   _tickBossAutoAttack() {
     if (this.bossDialoguePlaying) return;
-    if (this.bossSubmerged) return;
     if (Date.now() < this.bossAbilityLockoutUntil) return;
 
     const bossData = this.entitySlots.boss?._data;
@@ -1381,7 +1335,6 @@ export default class GameScene extends Phaser.Scene {
   // The boss uses abilities from the current phase abilityIds list.
   _tickBossAbilities() {
     if (this.bossDialoguePlaying) return;
-    if (this.bossSubmerged) return;
 
     // Grace period - no special abilities for the first 20 seconds of the fight
     const GRACE_PERIOD_MS = 20000;
@@ -1455,33 +1408,6 @@ export default class GameScene extends Phaser.Scene {
       console.log('[Boss]', bossName, 'uses', abilityName, 'on', singleTargetName + '!');
     }
 
-    // ========================
-    // Submerge - special case
-    // ========================
-    if (abilityId === 'submerge') {
-      this.showAbilityDialogue(abilityId);
-      this.bossSubmerged = true;
-      this.playBossSubmerge();
-
-      // AoE tick damage while submerged
-      const ticks    = ability.duration ?? 20;
-      let   ticksFired = 0;
-      const subTimer = this.time.addEvent({
-        delay:    TICK_MS,
-        loop:     true,
-        callback: () => {
-          ticksFired++;
-          const dmg = Phaser.Math.Between(ability.tickMin ?? 300, ability.tickMax ?? 600);
-          ['player', 'tank', 'healer'].forEach(id => this._applyDamageToCharacter(id, dmg, 'icon_submerge'));
-          console.log('[Boss] Submerge tick', ticksFired, '- AoE', dmg);
-          if (ticksFired >= ticks || !this.gameRunning) {
-            subTimer.remove();
-            this.bossSubmerged = false;
-            this.playBossEmerge();
-            console.log('[Boss] Ragnaros emerges!');
-          }
-        },
-      });
       // Register for all targets so death/rebirth clears it
       ['player', 'tank', 'healer'].forEach(id => this._registerDot(id, subTimer));
       return;
