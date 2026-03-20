@@ -138,6 +138,14 @@ export default class GameScene extends Phaser.Scene {
       repeat:    -1,
     }, 'shaman_idle');
 
+    // Auto-attack: 1024x768, 4x3 = 11 frames (last row has 3), plays once
+    this._safeCreateAnim({
+      key:       'shaman_attack',
+      frames:    anims.generateFrameNumbers('shaman_attack', { start: 0, end: 11 }),
+      frameRate: 10,
+      repeat:    0,
+    }, 'shaman_attack');
+
     // this._safeCreateAnim({
     //   key:       'shaman_cast_static_burst',
     //   frames:    anims.generateFrameNumbers('shaman_lightning', { start: 0, end: 2 }),
@@ -150,31 +158,23 @@ export default class GameScene extends Phaser.Scene {
     //   frames:    anims.generateFrameNumbers('shaman_chain', { start: 0, end: 3 }),
     //   frameRate: 10,
     //   repeat:    0,
-    // }, 'shaman_chain');
-
-    // Auto-attack: 1024x768, 4x3 = 11 frames (last row has 3), plays once
-    this._safeCreateAnim({
-      key:       'shaman_attack',
-      frames:    anims.generateFrameNumbers('shaman_attack', { start: 0, end: 11 }),
-      frameRate: 10,
-      repeat:    0,
-    }, 'shaman_attack');
+    // }, 'shaman_chain');  
 
     // Casting: 1024x1024, 4x4 = 16 frames, plays once then returns to idle
-    // this._safeCreateAnim({
-    //   key:       'shaman_casting',
-    //   frames:    anims.generateFrameNumbers('shaman_casting', { start: 0, end: 15 }),
-    //   frameRate: 12,
-    //   repeat:    0,
-    // }, 'shaman_casting');
+    this._safeCreateAnim({
+      key:       'shaman_casting',
+      frames:    anims.generateFrameNumbers('shaman_casting', { start: 0, end: 15 }),
+      frameRate: 12,
+      repeat:    0,
+    }, 'shaman_casting');
 
     // Hit: 1024x768, 4x3 = 12 frames, plays once then returns to idle
-    // this._safeCreateAnim({
-    //   key:       'shaman_hit',
-    //   frames:    anims.generateFrameNumbers('shaman_hit', { start: 0, end: 11 }),
-    //   frameRate: 12,
-    //   repeat:    0,
-    // }, 'shaman_hit');
+    this._safeCreateAnim({
+      key:       'shaman_hit',
+      frames:    anims.generateFrameNumbers('shaman_hit', { start: 0, end: 11 }),
+      frameRate: 12,
+      repeat:    0,
+    }, 'shaman_hit');
 
     // // Totem placement: 1024x768, 4x3 = 12 frames, plays once then returns to idle
     // this._safeCreateAnim({
@@ -196,36 +196,36 @@ export default class GameScene extends Phaser.Scene {
     }, 'tank_idle');
     
     // // Attack: 1024x1024, 4x4 = 16 frames, plays once then returns to idle
-    // this._safeCreateAnim({
-    //   key:       'tank_attack',
-    //   frames:    anims.generateFrameNumbers('tank_attack', { start: 0, end: 15 }),
-    //   frameRate: 12,
-    //   repeat:    0,
-    // }, 'tank_attack');
+    this._safeCreateAnim({
+      key:       'tank_attack',
+      frames:    anims.generateFrameNumbers('tank_attack', { start: 0, end: 15 }),
+      frameRate: 12,
+      repeat:    0,
+    }, 'tank_attack');
 
     // // Hit: 1024x768, 4x3 = 12 frames, plays once then returns to idle
-    // this._safeCreateAnim({
-    //   key:       'tank_hit',
-    //   frames:    anims.generateFrameNumbers('tank_hit', { start: 0, end: 11 }),
-    //   frameRate: 12,
-    //   repeat:    0,
-    // }, 'tank_hit');
+    this._safeCreateAnim({
+      key:       'tank_hit',
+      frames:    anims.generateFrameNumbers('tank_hit', { start: 0, end: 11 }),
+      frameRate: 12,
+      repeat:    0,
+    }, 'tank_hit');
 
     // Judgement spell - uncomment when tank_judge.png is finalized
-    // this._safeCreateAnim({
-    //   key:       'tank_judge',
-    //   frames:    anims.generateFrameNumbers('tank_judge', { start: 0, end: 15 }),
-    //   frameRate: 12,
-    //   repeat:    0,
-    // }, 'tank_judge');
+    this._safeCreateAnim({
+      key:       'tank_judge',
+      frames:    anims.generateFrameNumbers('tank_judge', { start: 0, end: 15 }),
+      frameRate: 12,
+      repeat:    0,
+    }, 'tank_judge');
 
     // Consecration spell - uncomment when tank_consecrate.png is finalized
-    // this._safeCreateAnim({
-    //   key:       'tank_consecrate',
-    //   frames:    anims.generateFrameNumbers('tank_consecrate', { start: 0, end: 15 }),
-    //   frameRate: 8,
-    //   repeat:    0,
-    // }, 'tank_consecrate');
+    this._safeCreateAnim({
+      key:       'tank_consecrate',
+      frames:    anims.generateFrameNumbers('tank_consecrate', { start: 0, end: 15 }),
+      frameRate: 8,
+      repeat:    0,
+    }, 'tank_consecrate');
 
     // =====================
     // HEALER ANIMATIONS
@@ -238,21 +238,29 @@ export default class GameScene extends Phaser.Scene {
       repeat:    -1,
     }, 'druid_idle');
 
+    // Druid attack
+    this._safeCreateAnim({
+      key:       'druid_attack',
+      frames:    anims.generateFrameNumbers('druid_attack', { start: 0, end: 15 }),
+      frameRate: 12,
+      repeat:    0,
+    }, 'druid_attack');
+
     // Casting: 1024x768, 4x3 = 12 frames, plays once then returns to idle
-    // this._safeCreateAnim({
-    //   key:       'druid_casting',
-    //   frames:    anims.generateFrameNumbers('druid_casting', { start: 0, end: 11 }),
-    //   frameRate: 12,
-    //   repeat:    0,
-    // }, 'druid_casting');
+    this._safeCreateAnim({
+      key:       'druid_casting',
+      frames:    anims.generateFrameNumbers('druid_casting', { start: 0, end: 11 }),
+      frameRate: 12,
+      repeat:    0,
+    }, 'druid_casting');
 
     // // Hit: 1024x1024, 4x4 = 16 frames, plays once then returns to idle
-    // this._safeCreateAnim({
-    //   key:       'druid_hit',
-    //   frames:    anims.generateFrameNumbers('druid_hit', { start: 0, end: 15 }),
-    //   frameRate: 12,
-    //   repeat:    0,
-    // }, 'druid_hit');
+    this._safeCreateAnim({
+      key:       'druid_hit',
+      frames:    anims.generateFrameNumbers('druid_hit', { start: 0, end: 15 }),
+      frameRate: 12,
+      repeat:    0,
+    }, 'druid_hit');
 
     // =====================
     // TOTEM ANIMATIONS
