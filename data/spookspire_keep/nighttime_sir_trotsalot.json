@@ -64,11 +64,11 @@
       ]
     },
     "sounds": {
-      "intro": "audio/ragnaros_intro.ogg",
-      "attack": "audio/ragnaros_attack.ogg",
-      "hit": "assets/raids/spookspire_keep/sounds/sound_hit_nighttime_sir_trotsalot.ogg",
-      "defeat": "audio/ragnaros_death.ogg",
-      "victory": "assets/raids/spookspire_keep/sounds/sound_victory.ogg"
+      "intro": "",
+      "attack": "",
+      "hit": "",
+      "defeat": "",
+      "victory": ""
     }
   },
   "abilities": {
