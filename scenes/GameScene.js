@@ -1312,6 +1312,7 @@ export default class GameScene extends Phaser.Scene {
   // Fires playBossAttack() every <attackSpeed> ticks as defined in the JSON.
   // attackSpeed: 1 = every tick, 2 = every 2 ticks, 3 = every 3 ticks, etc.
   _tickBossAutoAttack() {
+    console.log("[Boss] Attacking");
     if (this.bossDialoguePlaying) return;
     if (Date.now() < this.bossAbilityLockoutUntil) return;
 
@@ -1320,7 +1321,6 @@ export default class GameScene extends Phaser.Scene {
 
     const attackSpeed = Math.round(bossData.stats?.attackSpeed ?? 3);
     if (this.tickCount % attackSpeed === 0) {
-      console.log("[Boss] Attacking");
       this.playBossAttack();
     }
   }
@@ -2297,6 +2297,7 @@ export default class GameScene extends Phaser.Scene {
   // Fires playPlayerAutoAttack() every <attackSpeed> ticks as defined
   // in the player JSON data. attackSpeed: 2 = every 2 ticks, etc.
   _tickPlayerAutoAttack() {
+    console.log("[Player] Attacking");
     const playerData = this.entitySlots.player?._data;
     if (!playerData) return;
     if ((this.entitySlots.player?.currentHealth ?? 0) <= 0) return;
@@ -2469,6 +2470,7 @@ export default class GameScene extends Phaser.Scene {
   // Generates threat based on each ability's threatPerDamage from the JSON.
   // Priority: Consecration > Holy Shield > Judgement of Righteousness > Judgement of Wisdom
   _tickTankAbilities() {
+    console.log("[Tank] Attacking");
     const tankSlot = this.entitySlots.tank;
     if (!tankSlot?._data) return;
     if ((tankSlot.currentHealth ?? 0) <= 0) return;
