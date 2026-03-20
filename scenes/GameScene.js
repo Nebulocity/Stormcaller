@@ -845,7 +845,7 @@ export default class GameScene extends Phaser.Scene {
 
   playBossAttack() {
     const slot    = this.entitySlots.boss;
-    const animKey = this._getBossAnimKey('attack');
+    const animKey = this._getBossAnimKey('attacking');
     if (!slot?.sprite || !animKey) return;
 
     const current = slot.sprite.anims.currentAnim;
