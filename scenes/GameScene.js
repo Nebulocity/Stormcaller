@@ -443,7 +443,7 @@ export default class GameScene extends Phaser.Scene {
     const cx = zone.x + zone.w / 2;
     const cy = zone.y + zone.h - 80;
 
-    const sprite = this.add.sprite(cx, cy + 45, 'shaman_idle', 0)
+    const sprite = this.add.sprite(cx, cy + 90, 'shaman_idle', 0)
       .setScale(1)
       .setOrigin(0.5, 1);
 
@@ -2325,7 +2325,7 @@ export default class GameScene extends Phaser.Scene {
 
     if (!this.anims.exists('shaman_attack')) return;
 
-    slot.sprite.play('shaman_attack').setScale(2);
+    slot.sprite.play('shaman_attack');
     slot.sprite.once('animationcomplete', () => {
       if (this.anims.exists('shaman_idle')) slot.sprite.play('shaman_idle');
     });
