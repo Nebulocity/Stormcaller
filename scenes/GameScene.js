@@ -1913,13 +1913,13 @@ export default class GameScene extends Phaser.Scene {
       });
     }
 
-    // Threat - healing yourself generates no threat
-    if (targetId !== 'healer') {
-      const totalHeal = (ability.immediateHealMax ?? ability.immediateEffect?.value ?? 0)
-                      + (ability.tickHealMax ?? ability.tickEffect?.value ?? 0) * (ability.duration ?? 0);
-      this.addThreat('healer', Math.round(totalHeal * (ability.threatPerHealing ?? 0.1)));
-      this._updateThreatMeters();
-    }
+    // Threat - healing generates threat
+    const totalHeal = (ability.immediateHealMax ?? ability.immediateEffect?.value ?? 0)
+                    + (ability.tickHealMax ?? ability.tickEffect?.value ?? 0) * (ability.duration ?? 0);
+    this.addThreat('healer', Math.round(totalHeal * (ability.threatPerHealing ?? 0.1)));
+    
+    this._updateThreatMeters();
+    
     this.playHealerCast();
   }
 
@@ -2249,15 +2249,26 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  // Returns the character id with the highest current threat.
+  // Returns the character id with the highest current threat,
+  // or a random character if all threat is zero.
   getHighestThreatTarget() {
     if (!this.threatTable) this._initThreatTable();
-    let highestId     = 'tank';
+    const alive = ['tank', 'player', 'healer'].filter(
+      id => (this.entitySlots[id]?.currentHealth ?? 0) > 0
+    );
+    if (!alive.length) return 'tank';
+  
+    // If all threat is zero, pick a random alive target
+    const total = alive.reduce((sum, id) => sum + (this.threatTable[id] ?? 0), 0);
+    if (total === 0) return alive[Phaser.Math.Between(0, alive.length - 1)];
+  
+    let highestId = alive[0];
     let highestAmount = -1;
-    for (const [id, amount] of Object.entries(this.threatTable)) {
+    for (const id of alive) {
+      const amount = this.threatTable[id] ?? 0;
       if (amount > highestAmount) {
         highestAmount = amount;
-        highestId     = id;
+        highestId = id;
       }
     }
     return highestId;
