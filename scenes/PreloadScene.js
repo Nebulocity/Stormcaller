@@ -73,8 +73,8 @@ export default class PreloadScene extends Phaser.Scene {
 
     // ---- Shaman (player) ----
     // idle: 1024x512, 4x2 = 8 frames, 256x256 each
-    this.load.spritesheet('shaman_idle',     'assets/characters/shaman/character_shaman_idle.webp',     { frameWidth: 256, frameHeight: 256 });
-    this.load.spritesheet('shaman_attack',   'assets/characters/shaman/character_shaman_attack.webp',   { frameWidth: 256, frameHeight: 256 });
+    this.load.spritesheet('shaman_idle',     'assets/characters/shaman/character_shaman_idle.webp',     { frameWidth: 384, frameHeight: 384 });
+    this.load.spritesheet('shaman_attack',   'assets/characters/shaman/character_shaman_attack.webp',   { frameWidth: 384, frameHeight: 384 });
     // this.load.spritesheet('shaman_casting',  'assets/characters/shaman/character_shaman_casting.webp',  { frameWidth: 384, frameHeight: 384 });
     // this.load.spritesheet('shaman_hit',      'assets/characters/shaman/character_shaman_hit.webp',      { frameWidth: 384, frameHeight: 384 });
     // this.load.spritesheet('shaman_might_of_earth_totem',    'assets/characters/shaman/character_shaman_might_of_earth_totem.webp',    { frameWidth: 384, frameHeight: 384 });
