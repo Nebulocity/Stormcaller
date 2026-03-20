@@ -133,7 +133,7 @@ export default class GameScene extends Phaser.Scene {
     // Sheet: 3x4 grid, 12 frames each 256x256 - all idle
     this._safeCreateAnim({
       key:       'shaman_idle',
-      frames:    anims.generateFrameNumbers('shaman_idle', { start: 0, end: 11 }),
+      frames:    anims.generateFrameNumbers('shaman_idle', { start: 0, end: 10 }),
       frameRate: 10,
       repeat:    -1,
     }, 'shaman_idle');
@@ -190,8 +190,8 @@ export default class GameScene extends Phaser.Scene {
     // Idle: 1536x1024 sheet, 4 cols x 3 rows = 12 frames at 384x384
     this._safeCreateAnim({
       key:       'tank_idle',
-      frames:    anims.generateFrameNumbers('tank_idle', { start: 0, end: 11 }),
-      frameRate: 10,
+      frames:    anims.generateFrameNumbers('tank_idle', { start: 0, end: 7 }),
+      frameRate: 8,
       repeat:    -1,
     }, 'tank_idle');
     
@@ -439,7 +439,7 @@ export default class GameScene extends Phaser.Scene {
     const cy = zone.y + zone.h - 80;
 
     const sprite = this.add.sprite(cx, cy + 140, 'shaman_idle', 0)
-      .setScale(1.5)
+      .setScale(1)
       .setOrigin(0.5, 1);
 
     if (this.anims.exists('shaman_idle')) sprite.play('shaman_idle');

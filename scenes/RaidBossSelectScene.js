@@ -65,6 +65,7 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     });
 
     this._drawBossGrid(raid, saveData);
+    this._drawBackButton();
   }
 
   // ============================================================
