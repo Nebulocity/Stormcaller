@@ -1111,11 +1111,11 @@ export default class GameScene extends Phaser.Scene {
 
     // Pass an onComplete callback so the ticker starts only after
     // the last intro line finishes - guaranteeing no overlap.
-    this.showDialogueSequence(lines, '#ff9944', holdPerLine, 350, () => {
-      const delay = window.GAME_CONFIG.TICK_MS;
-      console.log('[GameScene] Intro finished - starting ticker, delay:', delay, 'ms');
-      this._startTicker(delay);
-    });
+    // this.showDialogueSequence(lines, '#ff9944', holdPerLine, 350, () => {
+    //   const delay = window.GAME_CONFIG.TICK_MS;
+    //   console.log('[GameScene] Intro finished - starting ticker, delay:', delay, 'ms');
+    //   this._startTicker(delay);
+    // });
 
   }
 
