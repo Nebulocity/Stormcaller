@@ -214,12 +214,24 @@ export default class PreloadScene extends Phaser.Scene {
     const icons = [
       // Healer
       'spirit surge', 'renew', 'sustain', 'burgeon', 'quicken', 'awaken',
+      
       // Tank
-      'verdict_of_righteousness', 'sanctify', 'sacred_bulwark', 'verdict_of_wisdom',
-      // Player (shaman)
-      'static_burst', 'arc_lightning',
-      'might_of_earth_totem', 'tempest_totem', 'warding_totem',
-      'totem_of_fury', 'wrath_of_storms_totem',
+      'verdict_of_righteousness', 'verdict_of_wisdom', 'verdict_of_prejudice', 'sanctify', 'sacred_bulwark', 'verdict_of_wisdom',
+      
+      // Shaman
+      'static_burst', 'arc_lightning', 'interject', 'ensnare', 'salve', 'earthfury',
+
+      // Earth totems
+      'might_totem', 'shield_totem', 'waking_totem',
+
+      // Air totems
+      'tempest_totem', 'warding_totem', 'flurry_totem',
+
+      // Fire totems
+      'blazing_totem', 'warmth_totem', 'wrath_totem',
+
+      // Water totems
+      'spring_totem', 'purify_totem', 'chill_totem',
       
       // Boss abilities (used by floating combat text)
       // 'wrath_of_ragnaros', 'magma_blast', 'submerge',
