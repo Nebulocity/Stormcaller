@@ -88,13 +88,13 @@ export default class PreloadScene extends Phaser.Scene {
     // this.load.spritesheet('shaman_arc_lightning',     'assets/characters/shaman/character_shaman_arc_lightning.webp',     { frameWidth: 384, frameHeight: 512 });
 
     // ---- Tank ----
-    this.load.spritesheet('tank_idle',     'assets/characters/tank/character_tank_idle.webp',     { frameWidth: 256, frameHeight: 256 });
+    this.load.spritesheet('tank_idle',     'assets/characters/tank/character_tank_idle.webp',     { frameWidth: 384, frameHeight: 384 });
     this.load.spritesheet('tank_attack',   'assets/characters/tank/character_tank_attack.webp',   { frameWidth: 384, frameHeight: 384 });
     // this.load.spritesheet('tank_hit',      'assets/characters/tank/character_tank_hit.webp',      { frameWidth: 384, frameHeight: 384 });
     // this.load.spritesheet('tank_defeated', 'assets/characters/tank/character_tank_defeated.webp', { frameWidth: 384, frameHeight: 384 });
 
     // ---- Healer ----
-    this.load.spritesheet('druid_idle',     'assets/characters/healer/character_healer_idle.webp',     { frameWidth: 256, frameHeight: 256 });
+    this.load.spritesheet('druid_idle',     'assets/characters/healer/character_healer_idle.webp',     { frameWidth: 384, frameHeight: 384 });
     this.load.spritesheet('druid_attack',   'assets/characters/tank/character_healer_attack.webp',   { frameWidth: 384, frameHeight: 384 });
     // this.load.spritesheet('druid_casting',  'assets/characters/healer/character_healer_casting.webp',  { frameWidth: 384, frameHeight: 384 });
     // this.load.spritesheet('druid_hit',      'assets/characters/healer/character_healer_hit.webp',      { frameWidth: 384, frameHeight: 384 });
