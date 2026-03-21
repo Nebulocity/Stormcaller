@@ -1,0 +1,373 @@
+{
+  "_comment": "Shared ability definitions for all characters. Boss-specific abilities live in their own boss JSON files. Characters reference abilities by ID in their abilityIds array.",
+
+  "verdict_of_prejudice": {
+    "id":          "verdict_of_prejudice",
+    "name":        "Verdict of Prejudice",
+    "class":       "paladin",
+    "description": "Massive holy strike -- the tank suffers 30% of the damage dealt to itself.",
+    "iconId":      "verdict_of_prejudice",
+    "manaCost":    666,
+    "recastTicks": 45,
+    "canCrit":     true,
+    "targetType":  "single_boss",
+    "effects": [
+      {
+        "type":       "damage",
+        "damageType": "holy",
+        "min":        5555,
+        "max":        9999,
+        "target":     "current_target"
+      },
+      {
+        "type":        "self_damage",
+        "damageType":  "holy",
+        "amountPct":   0.30,
+        "sourceEffect": 0,
+        "_comment":    "sourceEffect: index of the effect above whose result determines this damage"
+      }
+    ]
+  },
+
+  "verdict_of_righteousness": {
+    "id":          "verdict_of_righteousness",
+    "name":        "Verdict of Righteousness",
+    "class":       "paladin",
+    "description": "Serious holy strike against the current boss.",
+    "iconId":      "verdict_of_righteousness",
+    "manaCost":    400,
+    "recastTicks": 20,
+    "canCrit":     true,
+    "targetType":  "single_boss",
+    "effects": [
+      {
+        "type":       "damage",
+        "damageType": "holy",
+        "min":        2300,
+        "max":        4100,
+        "target":     "current_target"
+      }
+    ]
+  },
+
+  "verdict_of_wisdom": {
+    "id":          "verdict_of_wisdom",
+    "name":        "Verdict of Wisdom",
+    "class":       "paladin",
+    "description": "Moderate holy strike against the current boss.",
+    "iconId":      "verdict_of_wisdom",
+    "manaCost":    270,
+    "recastTicks": 0,
+    "canCrit":     true,
+    "targetType":  "single_boss",
+    "effects": [
+      {
+        "type":       "damage",
+        "damageType": "holy",
+        "min":        1200,
+        "max":        3100,
+        "target":     "current_target"
+      }
+    ]
+  },
+
+  "sanctify": {
+    "id":          "sanctify",
+    "name":        "Sanctify",
+    "class":       "paladin",
+    "description": "Holy burst that hits all bosses in the encounter.",
+    "iconId":      "sanctify",
+    "manaCost":    450,
+    "recastTicks": 8,
+    "canCrit":     true,
+    "targetType":  "all_bosses",
+    "effects": [
+      {
+        "type":       "damage",
+        "damageType": "holy",
+        "min":        600,
+        "max":        1100,
+        "target":     "all_bosses"
+      }
+    ]
+  },
+
+  "sacred_bulwark": {
+    "id":          "sacred_bulwark",
+    "name":        "Sacred Bulwark",
+    "class":       "paladin",
+    "description": "Boosts block rating and retaliates 10% of incoming auto-attack damage.",
+    "iconId":      "sacred_bulwark",
+    "manaCost":    200,
+    "recastTicks": 0,
+    "canCrit":     false,
+    "targetType":  "self",
+    "effects": [
+      {
+        "type":          "buff",
+        "target":        "self",
+        "durationTicks": 10,
+        "modifiers": [
+          { "stat": "blockChance", "addFlat": 30 }
+        ],
+        "onHitReaction": {
+          "type":        "damage",
+          "damageType":  "holy",
+          "amountPct":   0.10,
+          "of":          "incoming_damage",
+          "target":      "attacker"
+        }
+      }
+    ]
+  },
+
+  "provoke": {
+    "id":          "provoke",
+    "name":        "Provoke",
+    "class":       "paladin",
+    "description": "Clears the threat table and immediately puts the tank at maximum threat.",
+    "iconId":      "provoke",
+    "manaCost":    0,
+    "recastTicks": 60,
+    "canCrit":     false,
+    "targetType":  "single_boss",
+    "effects": [
+      {
+        "type":   "threat_override",
+        "target": "self",
+        "action": "set_max"
+      }
+    ]
+  },
+
+  "static_burst": {
+    "id":          "static_burst",
+    "name":        "Static Burst",
+    "class":       "shaman",
+    "description": "Quick nature blast against a single boss.",
+    "iconId":      "static_burst",
+    "manaCost":    300,
+    "recastTicks": 1,
+    "canCrit":     true,
+    "targetType":  "single_boss",
+    "effects": [
+      {
+        "type":       "damage",
+        "damageType": "nature",
+        "min":        3000,
+        "max":        6000,
+        "target":     "current_target"
+      }
+    ]
+  },
+
+  "arc_lightning": {
+    "id":          "arc_lightning",
+    "name":        "Arc Lightning",
+    "class":       "shaman",
+    "description": "Chains between up to 3 bosses for heavy nature damage.",
+    "iconId":      "arc_lightning",
+    "manaCost":    600,
+    "recastTicks": 4,
+    "canCrit":     true,
+    "targetType":  "random_multi_boss",
+    "targetCount": 3,
+    "effects": [
+      {
+        "type":       "damage",
+        "damageType": "nature",
+        "min":        6000,
+        "max":        10000,
+        "target":     "each"
+      }
+    ]
+  },
+
+  "ensnare": {
+    "id":          "ensnare",
+    "name":        "Ensnare",
+    "class":       "shaman",
+    "description": "Small nature hit and silences the boss for 3 ticks.",
+    "iconId":      "ensnare",
+    "manaCost":    300,
+    "recastTicks": 6,
+    "canCrit":     false,
+    "targetType":  "single_boss",
+    "effects": [
+      {
+        "type":       "damage",
+        "damageType": "nature",
+        "min":        500,
+        "max":        1000,
+        "target":     "current_target"
+      },
+      {
+        "type":          "debuff",
+        "target":        "current_target",
+        "durationTicks": 3,
+        "modifiers": [
+          { "stat": "canCastAbilities", "value": false }
+        ]
+      }
+    ]
+  },
+
+  "salve": {
+    "id":          "salve",
+    "name":        "Salve",
+    "class":       "shaman",
+    "description": "Heals target for 25% of their max health.",
+    "iconId":      "salve",
+    "manaCost":    700,
+    "recastTicks": 10,
+    "canCrit":     true,
+    "targetType":  "ally_lowest_hp",
+    "effects": [
+      {
+        "type":      "heal",
+        "amountPct": 0.25,
+        "of":        "target_max_health"
+      }
+    ]
+  },
+
+  "renew": {
+    "id":          "renew",
+    "name":        "Renew",
+    "class":       "druid",
+    "description": "Immediate heal plus a heal-over-time that resets on recast.",
+    "iconId":      "renew",
+    "manaCost":    600,
+    "recastTicks": 1,
+    "canCrit":     true,
+    "targetType":  "ally_lowest_hp",
+    "effects": [
+      {
+        "type": "heal",
+        "min":  3000,
+        "max":  5000
+      },
+      {
+        "type":          "heal_over_time",
+        "hotId":         "renew_hot",
+        "min":           4000,
+        "max":           7000,
+        "durationTicks": 10,
+        "stackable":     false,
+        "onRecast":      "reset"
+      }
+    ]
+  },
+
+  "sustain": {
+    "id":          "sustain",
+    "name":        "Sustain",
+    "class":       "druid",
+    "description": "No immediate heal -- applies a heal-over-time that resets on recast.",
+    "iconId":      "sustain",
+    "manaCost":    300,
+    "recastTicks": 1,
+    "canCrit":     true,
+    "targetType":  "ally_lowest_hp",
+    "effects": [
+      {
+        "type":          "heal_over_time",
+        "hotId":         "sustain_hot",
+        "min":           3000,
+        "max":           5000,
+        "durationTicks": 6,
+        "stackable":     false,
+        "onRecast":      "reset"
+      }
+    ]
+  },
+
+  "burgeon": {
+    "id":          "burgeon",
+    "name":        "Burgeon",
+    "class":       "druid",
+    "description": "Stackable HoT up to 3 times. Blooms on expiry for bonus healing.",
+    "iconId":      "burgeon",
+    "manaCost":    150,
+    "recastTicks": 1,
+    "canCrit":     true,
+    "targetType":  "ally_lowest_hp",
+    "effects": [
+      {
+        "type":            "heal_over_time",
+        "hotId":           "burgeon_hot",
+        "min":             1000,
+        "max":             2500,
+        "durationTicks":   20,
+        "stackable":       true,
+        "maxStacks":       3,
+        "onStackRefresh":  "reset_duration",
+        "onExpire": {
+          "type":       "heal",
+          "min":        1500,
+          "max":        2500,
+          "multiplier": "stack_count"
+        }
+      }
+    ]
+  },
+
+  "quicken": {
+    "id":          "quicken",
+    "name":        "Quicken",
+    "class":       "druid",
+    "description": "Restores mana over 8 ticks equal to target max mana * 0.10 / 20 per tick.",
+    "iconId":      "quicken",
+    "manaCost":    0,
+    "recastTicks": 0,
+    "canCrit":     false,
+    "targetType":  "ally_lowest_mana",
+    "effects": [
+      {
+        "type":          "mana_over_time",
+        "durationTicks": 8,
+        "amountPerTick": {
+          "formula": "target_max_mana * 0.10 / 20"
+        }
+      }
+    ]
+  },
+
+  "awaken": {
+    "id":          "awaken",
+    "name":        "Awaken",
+    "class":       "druid",
+    "description": "Resurrects a dead ally with 75% health and 75% mana.",
+    "iconId":      "awaken",
+    "manaCost":    1200,
+    "recastTicks": 0,
+    "canCrit":     false,
+    "targetType":  "ally_dead",
+    "effects": [
+      {
+        "type":      "resurrect",
+        "healthPct": 0.75,
+        "manaPct":   0.75
+      }
+    ]
+  },
+
+  "spirit_surge": {
+    "id":          "spirit_surge",
+    "name":        "Spirit Surge",
+    "class":       "druid",
+    "description": "Consumes one HoT and all its stacks, healing the full remaining value instantly.",
+    "iconId":      "spirit_surge",
+    "manaCost":    400,
+    "recastTicks": 0,
+    "canCrit":     true,
+    "targetType":  "ally_with_hot",
+    "effects": [
+      {
+        "type":   "consume_hot",
+        "target": "current_target",
+        "heal":   "full_remaining_value"
+      }
+    ]
+  }
+}

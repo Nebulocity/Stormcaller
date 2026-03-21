@@ -32,6 +32,14 @@ export default class GameScene extends Phaser.Scene {
     this.activeDots = { player: [], tank: [], healer: [] };
     this.bossDamageMultiplier = 1;
 
+    // Per-caster ability cooldown tracker: { casterId: { abilityId: lastUsedTick } }
+    // Character abilities use recastTicks so cooldowns are compared in tick units.
+    this.charAbilityCooldowns = { player: {}, tank: {}, healer: {} };
+
+    // Active HoTs per character: { characterId: { hotId: { stacks, tickHeal, ticksLeft, timer } } }
+    // Written by _applyHoT(), read by _emitBuffUpdate(), consumed by spirit_surge.
+    this.charHoTs = { player: {}, tank: {}, healer: {} };
+
     // Prevents boss abilities from overlapping while dialogue/audio is playing.
     // Set to true at the start of any boss dialogue sequence.
     // Set back to false when the last line finishes.
@@ -1335,6 +1343,7 @@ export default class GameScene extends Phaser.Scene {
   // The boss uses abilities from the current phase abilityIds list.
   _tickBossAbilities() {
     if (this.bossDialoguePlaying) return;
+    if (this.bossDebuffs?.silenced) return;   // ensnare / debuff
 
     // Grace period - no special abilities for the first 20 seconds of the fight
     const GRACE_PERIOD_MS = 20000;
@@ -1562,27 +1571,21 @@ export default class GameScene extends Phaser.Scene {
   // =====================================
   // Buff bar state emitter
   // =====================================
-  // Reads current healerState for a character and emits a 'buff-update'
-  // event to UIScene with the current list of active effects.
-  // Call this whenever healerState changes.
+  // Reads charHoTs for a character and emits a 'buff-update' event to UIScene
+  // with the current list of active effects. Call whenever charHoTs changes.
   _emitBuffUpdate(characterId) {
-    if (!this.healerState) return;
-
     const effects = [];
 
-    // Active HoTs (Regrowth, Rejuvenation)
-    const hots = this.healerState.activeHoTs[characterId] ?? {};
-    for (const [abilityId, hot] of Object.entries(hots)) {
-      effects.push({ abilityId, stacks: 1, ticksLeft: hot.ticksLeft ?? 0 });
+    // Active HoTs from the new charHoTs system
+    const hots = this.charHoTs?.[characterId] ?? {};
+    for (const [hotId, hot] of Object.entries(hots)) {
+      // Map hotId (e.g. 'renew_hot') back to the ability name for icon lookup.
+      // Convention: hotId is <abilityId>_hot, so strip the suffix for the icon key.
+      const abilityId = hotId.replace(/_hot$/, '');
+      effects.push({ abilityId, stacks: hot.stacks ?? 1, ticksLeft: hot.ticksLeft ?? 0 });
     }
 
-    // Lifebloom
-    const lb = this.healerState.lifeblooms[characterId];
-    if (lb) {
-      effects.push({ abilityId: 'lifebloom', stacks: lb.stacks ?? 1, ticksLeft: lb.ticksLeft ?? null });
-    }
-
-    // Holy Shield (tank only)
+    // Holy Shield -- legacy tank buff kept for back-compat until fully migrated
     if (characterId === 'tank') {
       const hs = this.entitySlots.tank?.holyShield;
       if (hs?.active && hs.charges > 0 && Date.now() < hs.expiresAt) {
@@ -1611,24 +1614,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   _cancelEffectsOnCharacter(characterId) {
-    if (!this.healerState) return;
-
-    // Cancel active HoTs (Regrowth, Rejuvenation)
-    const hots = this.healerState.activeHoTs[characterId];
-    if (hots) {
-      // The hotTimer references aren't stored - we clear the tracking object
-      // so the timer callbacks check activeHoTs and find nothing to heal.
-      delete this.healerState.activeHoTs[characterId];
+    // Cancel and clear all active HoT timers on this character
+    const hots = this.charHoTs?.[characterId] ?? {};
+    for (const hot of Object.values(hots)) {
+      if (hot.timer) { try { hot.timer.remove(); } catch(e) {} }
     }
+    if (this.charHoTs) this.charHoTs[characterId] = {};
 
-    // Cancel Lifebloom timer
-    const lb = this.healerState.lifeblooms[characterId];
-    if (lb) {
-      if (lb.timer) lb.timer.remove();
-      delete this.healerState.lifeblooms[characterId];
-    }
-
-    // Cancel active boss DoT timers (Magma Blast, Wrath of Fire, Submerge)
+    // Cancel active boss DoT timers (applied by _fireBossAbility)
     this._cancelDotsOnCharacter(characterId);
 
     // Clear buff bar display
@@ -1636,528 +1629,459 @@ export default class GameScene extends Phaser.Scene {
   }
 
   // =====================================
-  // Healer AI
+  // CHARACTER ABILITY ENGINE  (new effects[] schema)
   // =====================================
-  // Fires every tick but only acts every <actionInterval> ticks.
-  //
-  // Decision logic:
-  //   tank HP > 80%  -> do nothing (conserve mana)
-  //   tank HP 50-80% -> cast Rejuvenation (cheap HoT)
-  //   tank HP < 50%  -> cast Regrowth (immediate heal + HoT)
-  //   healer mana < 20% -> skip regardless (oom protection)
-  // =====================================
-  // Healer AI
-  // =====================================
-  // Fires every tick but only acts every actionInterval ticks.
-  //
-  // Priority order (tank-focused):
-  //   1. Lifebloom on tank if taking damage and stacks < 3
-  //   2. Regrowth on tank if tank < 80% (immediate burst + HoT)
-  //   3. Swiftmend on tank if tank < 60% (consumes Rejuv or Regrowth HoT)
-  //   4. Lifebloom again once previous stack blooms
-  //   5. Rejuvenation if any ally needs healing
-  //   6. Do nothing if no ally is below 80%
-  _tickHealerAI() {
-    const healerSlot = this.entitySlots.healer;
-    const tankSlot   = this.entitySlots.tank;
-    if (!healerSlot?._data || !tankSlot?._data) return;
-    if ((healerSlot.currentHealth ?? 0) <= 0) return;
 
-    const actionInterval = healerSlot._data.stats?.actionInterval ?? 3;
-    if (this.tickCount % actionInterval !== 0) return;
+  // Maps an ability's targetType to an array of slot IDs to apply effects to.
+  _resolveAbilityTargets(casterId, ability) {
+    const aliveIds = ['player', 'tank', 'healer'].filter(
+      id => (this.entitySlots[id]?.currentHealth ?? 0) > 0
+    );
+    const deadIds = ['player', 'tank', 'healer'].filter(
+      id => (this.entitySlots[id]?.currentHealth ?? 0) <= 0
+    );
 
-    // Do not interrupt a cast already playing
-    const current = healerSlot.sprite?.anims?.currentAnim;
-    if (current && current.key === 'healer_casting' && healerSlot.sprite.anims.isPlaying) return;
-
-    const abilities     = this.levelData?.abilities ?? {};
-    const healerMaxMana = healerSlot.manaBar?.maxValue ?? 1;
-    const healerMana    = healerSlot.currentMana ?? healerMaxMana;
-    const healerManaPct = healerMana / healerMaxMana;
-
-    // Shared state init
-    if (!this.healerState) {
-      this.healerState = {
-        lifeblooms:  {},
-        activeHoTs:  {},
-        rebirthUsed: false,
-        swiftmendCd: 0,
-      };
-    }
-
-    const tankMaxHp        = tankSlot.hpBar?.maxValue ?? 1;
-    const tankHp           = tankSlot.currentHealth ?? tankMaxHp;
-    const tankHpPct        = tankHp / tankMaxHp;
-    const tankTakingDamage = tankHp < tankMaxHp;
-
-    const lb      = abilities['lifebloom'];
-    const lbCost  = lb ? Math.round(healerMaxMana * (lb.manaCostPct ?? 0.06)) : 999999;
-    const rg      = abilities['regrowth'];
-    const rgCost  = rg?.manaCost ?? 999999;
-    const rj      = abilities['rejuvenation'];
-    const rjCost  = rj?.manaCost ?? 999999;
-    const sm      = abilities['swiftmend'];
-    const smCost  = sm ? Math.round(healerMaxMana * (sm.manaCostPct ?? 0.16)) : 999999;
-
-    // ============================
-    // Priority 1: Rebirth
-    // ============================
-    // Revive dead tank or player immediately - before anything else.
-    if (!this.healerState.rebirthUsed) {
-      const rb     = abilities['rebirth'];
-      const rbCost = rb?.manaCost ?? 999999;
-      if (rb && healerMana >= rbCost) {
-        for (const id of ['tank', 'player']) {
-          const s = this.entitySlots[id];
-          if (s && (s.currentHealth ?? 1) <= 0) {
-            this.time.delayedCall(500, () => { this._castRebirth(id, rb); });
-            return;
-          }
+    switch (ability.targetType) {
+      case 'self':
+        return [casterId];
+      case 'single_boss':
+      case 'current_target':
+        return ['boss'];
+      case 'all_bosses':
+        return ['boss'];
+      case 'random_multi_boss':
+        return ['boss'];
+      case 'ally_lowest_hp': {
+        let target = null, lowestPct = Infinity;
+        for (const id of aliveIds) {
+          const s   = this.entitySlots[id];
+          const pct = (s?.currentHealth ?? 1) / (s?.hpBar?.maxValue ?? 1);
+          if (pct < lowestPct) { lowestPct = pct; target = id; }
         }
+        return target ? [target] : [];
       }
-    }
-
-    // ============================
-    // Priority 2: Innervate
-    // ============================
-    // Costs 0 mana - fires even when healer is low. Targets any character
-    // at or below 15% mana, prioritising whoever is lowest.
-    const innervate = abilities['innervate'];
-    if (innervate) {
-      if (!this.innervateLastUsed) this.innervateLastUsed = 0;
-      const ivReady = Date.now() - this.innervateLastUsed >= (innervate.recastTimer ?? 360) * 1000;
-      if (ivReady) {
-        let ivTarget = null;
-        let ivLowest = 0.15;
-        for (const id of ['tank', 'player', 'healer']) {
-          const s = this.entitySlots[id];
-          if (!s || (s.currentHealth ?? 0) <= 0) continue;
-          const maxMana = s.manaBar?.maxValue ?? 1;
-          const pct     = (s.currentMana ?? maxMana) / maxMana;
-          if (pct <= ivLowest) { ivLowest = pct; ivTarget = id; }
+      case 'ally_lowest_mana': {
+        let target = null, lowestPct = Infinity;
+        for (const id of aliveIds) {
+          const s   = this.entitySlots[id];
+          const pct = (s?.currentMana ?? 1) / (s?.manaBar?.maxValue ?? 1);
+          if (pct < lowestPct) { lowestPct = pct; target = id; }
         }
-        if (ivTarget) {
-          this.time.delayedCall(500, () => { this._castInnervate(ivTarget, innervate); });
-          return;
+        return target ? [target] : [];
+      }
+      case 'ally_dead':
+        return deadIds.length ? [deadIds[0]] : [];
+      case 'ally_with_hot': {
+        for (const id of aliveIds) {
+          if (Object.keys(this.charHoTs?.[id] ?? {}).length > 0) return [id];
         }
+        return [];
       }
-    }
-
-    // OOM protection - below here all spells cost mana
-    if (healerManaPct < 0.15) return;
-
-    // ============================
-    // Priority 3: Lifebloom on tank if taking damage and stacks < 3
-    // ============================
-    const lbStacksTank = this.healerState.lifeblooms['tank']?.stacks ?? 0;
-    if (lb && healerMana >= lbCost && tankTakingDamage && lbStacksTank < 3) {
-      this.time.delayedCall(500, () => { this._castLifebloom('tank', lb, lbCost); });
-      return;
-    }
-
-    // ============================
-    // Priority 4: Swiftmend on any character < 50% who has a consumable HoT
-    // ============================
-    const smCdOk = Date.now() >= (this.healerState.swiftmendCd ?? 0);
-    if (sm && healerMana >= smCost && smCdOk) {
-      let smTarget = null;
-      let smLowest = 0.50;
-      for (const id of ['tank', 'player', 'healer']) {
-        const s = this.entitySlots[id];
-        if (!s || (s.currentHealth ?? 0) <= 0) continue;
-        const maxHp  = s.hpBar?.maxValue ?? 1;
-        const pct    = (s.currentHealth ?? maxHp) / maxHp;
-        const hots   = this.healerState.activeHoTs[id] ?? {};
-        const hasHoT = hots.rejuvenation || hots.regrowth;
-        if (pct < smLowest && hasHoT) { smLowest = pct; smTarget = id; }
-      }
-      if (smTarget) {
-        this.time.delayedCall(500, () => { this._castSwiftmend(smTarget, sm, smCost); });
-        return;
-      }
-    }
-
-    // ============================
-    // Priority 5: Regrowth on tank if tank < 60%
-    // ============================
-    if (rg && healerMana >= rgCost) {
-      let bestTarget = null;
-      let bestPct    = 0.60;
-      for (const id of ['tank', 'player', 'healer']) {
-        const s = this.entitySlots[id];
-        if (!s || (s.currentHealth ?? 0) <= 0) continue;
-        const maxHp = s.hpBar?.maxValue ?? 1;
-        const pct   = (s.currentHealth ?? maxHp) / maxHp;
-        if (pct < bestPct) { bestPct = pct; bestTarget = id; }
-      }
-      if (bestTarget) {
-        this.time.delayedCall(500, () => { this._castHeal('regrowth', rg, bestTarget); });
-        return;
-      }
-    }
-  
-    // ============================
-    // Priority 6: Lifebloom on any character taking damage
-    // 1 stack if < 90%, 2 stacks if < 80%, 3 stacks if < 70%
-    // ============================
-    if (lb && healerMana >= lbCost) {
-      for (const id of ['tank', 'player', 'healer']) {
-        const s = this.entitySlots[id];
-        if (!s || (s.currentHealth ?? 0) <= 0) continue;
-        const maxHp    = s.hpBar?.maxValue ?? 1;
-        const hp       = s.currentHealth ?? maxHp;
-        const pct      = hp / maxHp;
-        const curStack = this.healerState.lifeblooms[id]?.stacks ?? 0;
-
-        // Determine target stack count based on hp threshold
-        let targetStacks = 0;
-        if (pct < 0.70) targetStacks = 3;
-        else if (pct < 0.80) targetStacks = 2;
-        else if (pct < 0.90) targetStacks = 1;
-
-        if (targetStacks > 0 && curStack < targetStacks) {
-          this.time.delayedCall(500, () => { this._castLifebloom(id, lb, lbCost); });
-          return;
-        }
-      }
-    }
-  
-
-    // ============================
-    // Priority 7: Rejuvenation on any character below 80% without active Rejuv
-    // ============================
-    if (rj && healerMana >= rjCost) {
-      let bestTarget = null;
-      let bestPct    = 0.80;
-      for (const id of ['tank', 'player', 'healer']) {
-        const s = this.entitySlots[id];
-        if (!s || (s.currentHealth ?? 0) <= 0) continue;
-        const maxHp    = s.hpBar?.maxValue ?? 1;
-        const pct      = (s.currentHealth ?? maxHp) / maxHp;
-        const hasRejuv = this.healerState.activeHoTs[id]?.rejuvenation;
-        if (pct < bestPct && !hasRejuv) { bestPct = pct; bestTarget = id; }
-      }
-      if (bestTarget) {
-        this.time.delayedCall(500, () => { this._castHeal('rejuvenation', rj, bestTarget); });
-        return;
-      }
+      default:
+        return [];
     }
   }
-    
 
-  // ============================
-  // Cast helpers
-  // ============================
+  // Loops effects[] and routes each entry to its handler.
+  // effectResults[] lets later effects reference earlier resolved values.
+  _dispatchEffects(casterId, ability, targets) {
+    const TICK_MS      = window.GAME_CONFIG.TICK_MS;
+    const casterSlot   = this.entitySlots[casterId];
+    const casterData   = casterSlot?._data;
+    const critChance   = casterData?.stats?.critChance    ?? 0;
+    const critMult     = casterData?.stats?.critMultiplier ?? 2.0;
+    const iconKey      = 'icon_' + (ability.iconId ?? ability.id);
+    const effectResults = [];
 
-  // Generic heal cast - handles Regrowth (immediate + HoT) and Rejuvenation (HoT only)
-  _castHeal(abilityId, ability, targetId) {
-    const healerSlot    = this.entitySlots.healer;
-    const healerMaxMana = healerSlot.manaBar?.maxValue ?? 1;
-    const healerMana    = healerSlot.currentMana ?? healerMaxMana;
+    for (let i = 0; i < (ability.effects?.length ?? 0); i++) {
+      const eff = ability.effects[i];
 
-    // Deduct mana
-    healerSlot.currentMana = Math.max(0, healerMana - ability.manaCost);
-    this._setManaBar(healerSlot.manaBar, healerSlot.currentMana / healerMaxMana);
-    this._recordCast('healer');
+      switch (eff.type) {
 
-    const tankHpPct = (this.entitySlots.tank?.currentHealth ?? 1) /
-                      (this.entitySlots.tank?.hpBar?.maxValue ?? 1);
-    const danger = tankHpPct < 0.50 ? ' [CRITICAL]' : tankHpPct < 0.80 ? ' [LOW]' : '';
-    console.log('[Healer]', abilityId, '->', targetId,
-      '(' + Math.round(tankHpPct * 100) + '% tank hp)' + danger);
-
-    // Badge on healer showing what was cast
-    const uiForHeal = this.scene.get('UIScene');
-    if (uiForHeal?.spawnAbilityBadge) {
-      uiForHeal.spawnAbilityBadge(window.GAME_CONFIG.ZONES.HEALER, abilityId, ability.name ?? abilityId);
-    }
-
-    // Immediate heal with random roll in range
-    if (ability.immediateFlag && ability.immediateEffect?.type === 'heal') {
-      const min    = ability.immediateHealMin ?? ability.immediateEffect.value;
-      const max    = ability.immediateHealMax ?? ability.immediateEffect.value;
-      const amount = Phaser.Math.Between(min, max);
-      this._applyHealToCharacter(targetId, amount, abilityId);
-    }
-
-    // HoT ticks - roll once at cast time, same amount each tick
-    if (ability.tickEffect?.type === 'heal' && ability.duration > 0) {
-      const min      = ability.tickHealMin ?? ability.tickEffect.value;
-      const max      = ability.tickHealMax ?? ability.tickEffect.value;
-      const tickHeal = Phaser.Math.Between(min, max);
-      const duration = ability.duration;
-      let   ticks    = 0;
-
-      // Track active HoT so Swiftmend can consume it
-      if (!this.healerState.activeHoTs[targetId]) this.healerState.activeHoTs[targetId] = {};
-      this.healerState.activeHoTs[targetId][abilityId] = { ticksLeft: duration, tickHeal };
-      this._emitBuffUpdate(targetId);
-
-      const hotTimer = this.time.addEvent({
-        delay:    window.GAME_CONFIG.TICK_MS,
-        loop:     true,
-        callback: () => {
-          ticks++;
-          this._applyHealToCharacter(targetId, tickHeal, abilityId);
-          if (this.healerState.activeHoTs[targetId]?.[abilityId]) {
-            this.healerState.activeHoTs[targetId][abilityId].ticksLeft--;
+        case 'damage': {
+          let dmg = Phaser.Math.Between(eff.min, eff.max);
+          if (ability.canCrit && Math.random() * 100 < critChance) {
+            dmg = Math.round(dmg * critMult);
           }
-          if (ticks >= duration || !this.gameRunning) {
-            hotTimer.remove();
-            if (this.healerState.activeHoTs[targetId]) {
-              delete this.healerState.activeHoTs[targetId][abilityId];
+          for (const tid of targets) {
+            if (tid === 'boss') {
+              this._applyDamageToBoss(dmg, iconKey);
+              this.addThreat(casterId, Math.round(dmg));
+              this._updateThreatMeters();
             }
           }
-          this._emitBuffUpdate(targetId);
-        },
-      });
-    }
+          effectResults[i] = dmg;
+          break;
+        }
 
-    // Threat - healing generates threat
-    const totalHeal = (ability.immediateHealMax ?? ability.immediateEffect?.value ?? 0)
-                    + (ability.tickHealMax ?? ability.tickEffect?.value ?? 0) * (ability.duration ?? 0);
-    this.addThreat('healer', Math.round(totalHeal * (ability.threatPerHealing ?? 0.1)));
-    
-    this._updateThreatMeters();
-    
-    this.playHealerCast();
+        case 'self_damage': {
+          const sourceVal = effectResults[eff.sourceEffect ?? 0] ?? 0;
+          const selfDmg   = Math.round(sourceVal * (eff.amountPct ?? 0));
+          if (selfDmg > 0) {
+            this._applyDamageToCharacter(casterId, selfDmg, iconKey);
+            console.log('[' + casterId + '] ' + ability.id + ' self-damage: ' + selfDmg);
+          }
+          effectResults[i] = selfDmg;
+          break;
+        }
+
+        case 'heal': {
+          for (const tid of targets.filter(t => t !== 'boss')) {
+            let amount;
+            if (eff.amountPct && eff.of === 'target_max_health') {
+              amount = Math.round((this.entitySlots[tid]?.hpBar?.maxValue ?? 1) * eff.amountPct);
+            } else {
+              amount = Phaser.Math.Between(eff.min, eff.max);
+            }
+            if (ability.canCrit && Math.random() * 100 < critChance) {
+              amount = Math.round(amount * critMult);
+            }
+            this._applyHealToCharacter(tid, amount, ability.id);
+            this.addThreat(casterId, Math.round(amount * 0.1));
+            this._updateThreatMeters();
+          }
+          break;
+        }
+
+        case 'heal_over_time': {
+          for (const tid of targets.filter(t => t !== 'boss')) {
+            this._applyHoT(casterId, ability, eff, tid);
+          }
+          break;
+        }
+
+        case 'mana_over_time': {
+          for (const tid of targets.filter(t => t !== 'boss')) {
+            this._applyMoT(casterId, ability, eff, tid);
+          }
+          break;
+        }
+
+        case 'resurrect': {
+          for (const tid of targets) {
+            const slot = this.entitySlots[tid];
+            if (!slot) continue;
+            const maxHp  = slot.hpBar?.maxValue  ?? 1;
+            const maxMp  = slot.manaBar?.maxValue ?? 1;
+            const restHp = Math.round(maxHp * (eff.healthPct ?? 0.75));
+            const restMp = Math.round(maxMp * (eff.manaPct   ?? 0.75));
+            slot.currentHealth = restHp;
+            slot.currentMana   = restMp;
+            this._setHealthBar(slot.hpBar, restHp / maxHp);
+            if (slot.manaBar) this._setManaBar(slot.manaBar, restMp / maxMp);
+            if (slot.sprite) {
+              slot.sprite.setAlpha(0);
+              this.tweens.add({ targets: slot.sprite, alpha: 1, duration: 800 });
+              if (tid === 'tank'   && this.anims.exists('tank_idle'))   slot.sprite.play('tank_idle');
+              if (tid === 'player' && this.anims.exists('shaman_idle')) slot.sprite.play('shaman_idle');
+              if (tid === 'healer' && this.anims.exists('healer_idle')) slot.sprite.play('healer_idle');
+            }
+            this.showPopup((slot._data?.name ?? tid) + ' returns to life!', '#aaffaa', 3000);
+            console.log('[' + casterId + '] Awaken -> ' + tid, restHp + 'hp', restMp + 'mana');
+          }
+          break;
+        }
+
+        case 'consume_hot': {
+          for (const tid of targets.filter(t => t !== 'boss')) {
+            const hots    = this.charHoTs?.[tid] ?? {};
+            const hotKeys = Object.keys(hots);
+            if (!hotKeys.length) continue;
+            const hotId   = hotKeys[0];
+            const hotData = hots[hotId];
+            const stacks  = hotData.stacks  ?? 1;
+            const remaining = (hotData.ticksLeft ?? 0) * (hotData.tickHeal ?? 0) * stacks;
+            if (hotData.timer) { try { hotData.timer.remove(); } catch(e) {} }
+            delete this.charHoTs[tid][hotId];
+            this._emitBuffUpdate(tid);
+            if (remaining > 0) this._applyHealToCharacter(tid, remaining, ability.id);
+            console.log('[' + casterId + '] Spirit Surge consumed ' + hotId + ' on ' + tid + ' for ' + remaining);
+          }
+          break;
+        }
+
+        case 'threat_override': {
+          if (eff.action === 'set_max') {
+            const allThreat = Object.values(this.threatTable ?? {});
+            const maxThreat = (allThreat.length ? Math.max(...allThreat) : 0) + 10000;
+            if (!this.threatTable) this.threatTable = {};
+            this.threatTable[casterId] = maxThreat;
+            this._updateThreatMeters();
+            console.log('[' + casterId + '] Provoke -- threat set to ' + maxThreat);
+          }
+          break;
+        }
+
+        case 'buff': {
+          const buffTargets = (eff.target === 'self') ? [casterId] : targets;
+          const durationMs  = (eff.durationTicks ?? 0) * TICK_MS;
+          for (const tid of buffTargets) {
+            const slot = this.entitySlots[tid];
+            if (!slot) continue;
+            for (const mod of (eff.modifiers ?? [])) {
+              if (mod.stat === 'blockChance' && mod.addFlat) {
+                slot._bonusBlockChance = (slot._bonusBlockChance ?? 0) + mod.addFlat;
+                this.time.delayedCall(durationMs, () => {
+                  slot._bonusBlockChance = Math.max(0, (slot._bonusBlockChance ?? 0) - mod.addFlat);
+                });
+              }
+            }
+            if (eff.onHitReaction) {
+              slot._onHitReaction = { ...eff.onHitReaction, expiresAt: Date.now() + durationMs };
+              this.time.delayedCall(durationMs, () => { delete slot._onHitReaction; });
+            }
+          }
+          this._emitBuffUpdate(casterId);
+          break;
+        }
+
+        case 'debuff': {
+          const durationMs = (eff.durationTicks ?? 0) * TICK_MS;
+          for (const tid of targets) {
+            if (tid !== 'boss') continue;
+            if (!this.bossDebuffs) this.bossDebuffs = {};
+            for (const mod of (eff.modifiers ?? [])) {
+              if (mod.stat === 'canCastAbilities' && mod.value === false) {
+                this.bossDebuffs.silenced = true;
+                this.time.delayedCall(durationMs, () => {
+                  if (this.bossDebuffs) delete this.bossDebuffs.silenced;
+                });
+                console.log('[' + casterId + '] Boss silenced for ' + eff.durationTicks + ' ticks');
+              }
+            }
+          }
+          break;
+        }
+
+        default:
+          console.warn('[GameScene] Unknown effect type:', eff.type, 'on', ability.id);
+      }
+    }
   }
 
-  // Lifebloom - stacking HoT with bloom on expiry
-  _castLifebloom(targetId, ability, manaCost) {
-    const healerSlot    = this.entitySlots.healer;
-    const healerMaxMana = healerSlot.manaBar?.maxValue ?? 1;
-    const healerMana    = healerSlot.currentMana ?? healerMaxMana;
+  // Apply a heal-over-time. Handles stacking (burgeon), reset-on-recast, bloom-on-expire.
+  _applyHoT(casterId, ability, eff, targetId) {
+    const TICK_MS = window.GAME_CONFIG.TICK_MS;
+    const hotId   = eff.hotId ?? (ability.id + '_hot');
 
-    healerSlot.currentMana = Math.max(0, healerMana - manaCost);
-    this._setManaBar(healerSlot.manaBar, healerSlot.currentMana / healerMaxMana);
-    this._recordCast('healer');
+    if (!this.charHoTs[targetId]) this.charHoTs[targetId] = {};
+    const existing = this.charHoTs[targetId][hotId];
 
-    // Roll tick and bloom values once per application
-    const tickHeal  = Phaser.Math.Between(ability.tickHealMin ?? 273, ability.tickHealMax ?? 465);
-    const bloomHeal = Phaser.Math.Between(ability.bloomHealMin ?? 600, ability.bloomHealMax ?? 975);
-    const duration  = ability.duration ?? 7;
-
-    // Cancel any existing Lifebloom timer on this target (reset duration)
-    const existing = this.healerState.lifeblooms[targetId];
-    if (existing?.timer) existing.timer.remove();
-
-    const newStacks = Math.min((existing?.stacks ?? 0) + 1, ability.maxStacks ?? 3);
-    console.log('[Healer] Lifebloom ->', targetId, 'stack', newStacks,
-      'tick', tickHeal, 'bloom', bloomHeal);
-
-    // Badge on healer
-    const uiForLb = this.scene.get('UIScene');
-    if (uiForLb?.spawnAbilityBadge) {
-      uiForLb.spawnAbilityBadge(window.GAME_CONFIG.ZONES.HEALER, 'lifebloom', 'Lifebloom');
+    let stacks = 1;
+    if (eff.stackable && existing) {
+      stacks = Math.min((existing.stacks ?? 1) + 1, eff.maxStacks ?? 1);
     }
+    if (existing?.timer) { try { existing.timer.remove(); } catch(e) {} }
 
-    let ticks = 0;
-    const lbTimer = this.time.addEvent({
-      delay:    window.GAME_CONFIG.TICK_MS,
-      loop:     true,
+    const tickHeal  = Phaser.Math.Between(eff.min, eff.max);
+    let   ticksLeft = eff.durationTicks;
+
+    const hotTimer = this.time.addEvent({
+      delay: TICK_MS,
+      loop:  true,
       callback: () => {
-        ticks++;
-        // Each tick heals (tickHeal * stacks)
-        const stacks      = this.healerState.lifeblooms[targetId]?.stacks ?? 1;
-        const tickTotal   = tickHeal * stacks;
-        this._applyHealToCharacter(targetId, tickTotal, 'lifebloom');
+        if ((this.entitySlots[targetId]?.currentHealth ?? 0) <= 0) {
+          hotTimer.remove();
+          if (this.charHoTs[targetId]) delete this.charHoTs[targetId][hotId];
+          this._emitBuffUpdate(targetId);
+          return;
+        }
+        const curStacks = this.charHoTs[targetId]?.[hotId]?.stacks ?? 1;
+        let   heal      = tickHeal * curStacks;
+        const crit      = this.entitySlots[casterId]?._data?.stats?.critChance ?? 0;
+        if (ability.canCrit && Math.random() * 100 < crit) {
+          heal = Math.round(heal * (this.entitySlots[casterId]?._data?.stats?.critMultiplier ?? 2.0));
+        }
+        this._applyHealToCharacter(targetId, heal, ability.id);
+        this.addThreat(casterId, Math.round(heal * 0.1));
+        this._updateThreatMeters();
 
-        // Decrement ticksLeft for buff bar display
-        if (this.healerState.lifeblooms[targetId]) {
-          this.healerState.lifeblooms[targetId].ticksLeft = Math.max(0, duration - ticks);
+        ticksLeft--;
+        if (this.charHoTs[targetId]?.[hotId]) {
+          this.charHoTs[targetId][hotId].ticksLeft = ticksLeft;
           this._emitBuffUpdate(targetId);
         }
 
-        if (ticks >= duration || !this.gameRunning) {
-          lbTimer.remove();
-          // Bloom: instant heal on duration end
-          const currentStacks = this.healerState.lifeblooms[targetId]?.stacks ?? 1;
-          const bloomTotal    = bloomHeal * currentStacks;
-          this._applyHealToCharacter(targetId, bloomTotal, 'lifebloom');
-          console.log('[Healer] Lifebloom BLOOM on', targetId, 'for', bloomTotal);
-          delete this.healerState.lifeblooms[targetId];
+        if (ticksLeft <= 0 || !this.gameRunning) {
+          hotTimer.remove();
+          if (eff.onExpire && this.charHoTs[targetId]?.[hotId]) {
+            const bloomStacks = this.charHoTs[targetId][hotId].stacks ?? 1;
+            const bloomBase   = Phaser.Math.Between(
+              eff.onExpire.min ?? eff.min,
+              eff.onExpire.max ?? eff.max
+            );
+            const bloomHeal = bloomBase * (eff.onExpire.multiplier === 'stack_count' ? bloomStacks : 1);
+            this._applyHealToCharacter(targetId, bloomHeal, ability.id);
+            console.log('[' + casterId + '] ' + ability.id + ' bloom: ' + bloomHeal + ' (' + bloomStacks + 'x)');
+          }
+          if (this.charHoTs[targetId]) delete this.charHoTs[targetId][hotId];
           this._emitBuffUpdate(targetId);
         }
       },
     });
 
-    this.healerState.lifeblooms[targetId] = {
-      stacks:    newStacks,
-      tickHeal,
-      bloomHeal,
-      timer:     lbTimer,
-      ticksLeft: duration,
-      duration,
-    };
-    this._emitBuffUpdate(targetId);
-
-    this.addThreat('healer', Math.round((tickHeal * duration + bloomHeal) * (ability.threatPerHealing ?? 0.1)));
+    this.charHoTs[targetId][hotId] = { stacks, tickHeal, ticksLeft, timer: hotTimer };
+    this.addThreat(casterId, Math.round(tickHeal * eff.durationTicks * stacks * 0.1));
     this._updateThreatMeters();
-    this.playHealerCast();
-  }
-
-  // Swiftmend - consume Rejuv or Regrowth HoT for an instant heal
-  _castSwiftmend(targetId, ability, manaCost) {
-    const healerSlot    = this.entitySlots.healer;
-    const healerMaxMana = healerSlot.manaBar?.maxValue ?? 1;
-    const healerMana    = healerSlot.currentMana ?? healerMaxMana;
-
-    healerSlot.currentMana = Math.max(0, healerMana - manaCost);
-    this._setManaBar(healerSlot.manaBar, healerSlot.currentMana / healerMaxMana);
-    this._recordCast('healer');
-
-    // Set cooldown
-    this.healerState.swiftmendCd = Date.now() + (ability.recastTimer ?? 15) * 1000;
-
-    // Find which HoT to consume (prefer Rejuvenation, fall back to Regrowth)
-    const hotState = this.healerState.activeHoTs[targetId] ?? {};
-    let   consumed = null;
-    let   consumedId = null;
-
-    if (hotState.rejuvenation) {
-      consumed   = hotState.rejuvenation;
-      consumedId = 'rejuvenation';
-    } else if (hotState.regrowth) {
-      consumed   = hotState.regrowth;
-      consumedId = 'regrowth';
-    }
-
-    if (!consumed) return;
-
-    // Heal = tickHeal x remaining ticks
-    const healAmount = consumed.tickHeal * consumed.ticksLeft;
-    delete this.healerState.activeHoTs[targetId][consumedId];
     this._emitBuffUpdate(targetId);
-
-    this._applyHealToCharacter(targetId, healAmount, 'swiftmend');
-    console.log('[Healer] Swiftmend consumed', consumedId, 'on', targetId, 'for', healAmount);
-
-    // Badge on healer
-    const uiForSm = this.scene.get('UIScene');
-    if (uiForSm?.spawnAbilityBadge) {
-      uiForSm.spawnAbilityBadge(window.GAME_CONFIG.ZONES.HEALER, 'swiftmend', 'Swiftmend');
-    }
-
-    this.addThreat('healer', Math.round(healAmount * (ability.threatPerHealing ?? 0.1)));
-    this._updateThreatMeters();
-    this.playHealerCast();
+    console.log('[' + casterId + '] ' + ability.id + ' HoT -> ' + targetId + ' (' + stacks + ' stack(s), ' + tickHeal + '/tick)');
   }
 
-  // Rebirth - revive a dead ally with partial health/mana (once per level)
-  _castRebirth(targetId, ability) {
-    const healerSlot    = this.entitySlots.healer;
-    const healerMaxMana = healerSlot.manaBar?.maxValue ?? 1;
-    const healerMana    = healerSlot.currentMana ?? healerMaxMana;
-
-    healerSlot.currentMana = Math.max(0, healerMana - ability.manaCost);
-    this._setManaBar(healerSlot.manaBar, healerSlot.currentMana / healerMaxMana);
-    this._recordCast('healer');
-
-    this.healerState.rebirthUsed = true;
-
-    const slot      = this.entitySlots[targetId];
-    const restoreHp = ability.immediateEffect?.restoreHealth ?? 1100;
-    const restoreMp = ability.immediateEffect?.restoreMana   ?? 1700;
-
-    // Restore health and mana
-    slot.currentHealth = restoreHp;
-    slot.currentMana   = restoreMp;
-    this._setHealthBar(slot.hpBar, restoreHp / (slot.hpBar?.maxValue ?? 1));
-    if (slot.manaBar) this._setManaBar(slot.manaBar, restoreMp / (slot.manaBar?.maxValue ?? 1));
-
-    // Fade the sprite back in
-    if (slot.sprite) {
-      slot.sprite.setAlpha(0);
-      this.tweens.add({ targets: slot.sprite, alpha: 1, duration: 800 });
-      if (targetId === 'tank' && this.anims.exists('tank_idle')) slot.sprite.play('tank_idle');
-      if (targetId === 'player' && this.anims.exists('shaman_idle')) slot.sprite.play('shaman_idle');
-    }
-
-    this.showPopup((slot._data?.name ?? targetId) + ' returns to life!', '#aaffaa', 3000);
-    console.log('[Healer] Rebirth on', targetId, '- restored', restoreHp, 'hp,', restoreMp, 'mana');
-
-    // Badge on healer
-    const uiForRb = this.scene.get('UIScene');
-    if (uiForRb?.spawnAbilityBadge) {
-      uiForRb.spawnAbilityBadge(window.GAME_CONFIG.ZONES.HEALER, 'rebirth', 'Rebirth');
-    }
-    this.playHealerCast();
-  }
-
-  // Apply healing to a character, capped at their max health.
-  // iconKey is optional - pass ability id like 'regrowth' to show icon on the number
-  _applyHealToCharacter(characterId, amount, abilityId = null) {
-    const slot = this.entitySlots[characterId];
-    if (!slot) return;
-    // Never heal a dead character - Rebirth is the only way back
-    if ((slot.currentHealth ?? 0) <= 0) return;
-
-    const maxHealth    = slot.hpBar?.maxValue ?? 1;
-    const prevHealth   = slot.currentHealth ?? maxHealth;
-    slot.currentHealth = Math.min(maxHealth, prevHealth + amount);
-
-    const pct = slot.currentHealth / maxHealth;
-    this._setHealthBar(slot.hpBar, pct);
-
-    // Spawn floating heal number with optional ability icon
-    const uiScene = this.scene.get('UIScene');
-    if (uiScene?.spawnFloatingText) {
-      const zone    = window.GAME_CONFIG.ZONES[characterId.toUpperCase()]
-                      ?? window.GAME_CONFIG.ZONES.TANK;
-      const iconKey = abilityId ? 'icon_' + abilityId : null;
-      uiScene.spawnFloatingText(zone, amount, 'heal', iconKey);
-    }
-  }
-
-  // Innervate - restore 4x target's max mana over 20 ticks (0 mana cost)
-  _castInnervate(targetId, ability) {
-    this.innervateLastUsed = Date.now();
-    this._recordCast('healer');
-
-    const targetSlot  = this.entitySlots[targetId];
+  // Apply a mana-over-time (quicken).
+  _applyMoT(casterId, ability, eff, targetId) {
+    const TICK_MS    = window.GAME_CONFIG.TICK_MS;
+    const targetSlot = this.entitySlots[targetId];
     if (!targetSlot) return;
+    const maxMana  = targetSlot.manaBar?.maxValue ?? 1;
+    const duration = eff.durationTicks ?? 8;
+    // "target_max_mana * 0.10 / 20"
+    const tickRestore = eff.amountPerTick?.formula
+      ? Math.round(maxMana * 0.10 / 20)
+      : Math.round(eff.amountPerTick ?? 0);
 
-    const targetMaxMana = targetSlot.manaBar?.maxValue ?? 1;
-    // Total restore = maxMana * 4, spread over duration ticks
-    const duration      = ability.duration ?? 20;
-    const totalRestore  = targetMaxMana * (ability.tickEffect?.valuePct ?? 4.0);
-    const tickRestore   = Math.round(totalRestore / duration);
-
-    console.log('[Healer] Innervate ->', targetId,
-      'restoring', tickRestore, '/tick for', duration, 'ticks');
-
-    // Badge on healer
-    const uiForIv = this.scene.get('UIScene');
-    if (uiForIv?.spawnAbilityBadge) {
-      uiForIv.spawnAbilityBadge(window.GAME_CONFIG.ZONES.HEALER, 'innervate', 'Innervate');
-    }
-
+    console.log('[' + casterId + '] Quicken -> ' + targetId + ' ' + tickRestore + '/tick x' + duration);
     let ticks = 0;
-    const ivTimer = this.time.addEvent({
-      delay:    window.GAME_CONFIG.TICK_MS,
-      loop:     true,
+    const timer = this.time.addEvent({
+      delay: TICK_MS, loop: true,
       callback: () => {
         ticks++;
-        const currentMana = targetSlot.currentMana ?? targetMaxMana;
-        targetSlot.currentMana = Math.min(targetMaxMana, currentMana + tickRestore);
-        this._setManaBar(targetSlot.manaBar, targetSlot.currentMana / targetMaxMana);
-
-        // Floating mana text on target
+        const cur = targetSlot.currentMana ?? maxMana;
+        targetSlot.currentMana = Math.min(maxMana, cur + tickRestore);
+        this._setManaBar(targetSlot.manaBar, targetSlot.currentMana / maxMana);
         const ui = this.scene.get('UIScene');
         if (ui?.spawnFloatingText) {
           const zone = window.GAME_CONFIG.ZONES[targetId.toUpperCase()];
-          if (zone) ui.spawnFloatingText(zone, tickRestore, 'mana', 'icon_innervate');
+          if (zone) ui.spawnFloatingText(zone, tickRestore, 'mana', 'icon_' + ability.id);
         }
-
-        if (ticks >= duration || !this.gameRunning) ivTimer.remove();
+        if (ticks >= duration || !this.gameRunning) timer.remove();
       },
     });
+  }
 
-    this.playHealerCast();
+  // Unified cast dispatcher for all three player characters.
+  // Handles mana check, tick-based cooldown, target resolution, and effect dispatch.
+  // Returns true if the ability fired successfully.
+  _castCharacterAbility(casterId, abilityId) {
+    const slot = this.entitySlots[casterId];
+    if (!slot?._data) return false;
+    if ((slot.currentHealth ?? 0) <= 0) return false;
+
+    const ability = this.levelData?.abilities?.[abilityId];
+    if (!ability?.effects) return false;
+
+    const maxMana = slot.manaBar?.maxValue ?? 1;
+    const mana    = slot.currentMana ?? maxMana;
+    if (mana < (ability.manaCost ?? 0)) return false;
+
+    if (!this.charAbilityCooldowns[casterId]) this.charAbilityCooldowns[casterId] = {};
+    const lastUsed = this.charAbilityCooldowns[casterId][abilityId] ?? -Infinity;
+    if (this.tickCount - lastUsed < (ability.recastTicks ?? 0)) return false;
+
+    const targets = this._resolveAbilityTargets(casterId, ability);
+    if (!targets.length) return false;
+
+    // Commit
+    slot.currentMana = Math.max(0, mana - (ability.manaCost ?? 0));
+    this._setManaBar(slot.manaBar, slot.currentMana / maxMana);
+    this.charAbilityCooldowns[casterId][abilityId] = this.tickCount;
+    this._recordCast(casterId);
+
+    this._dispatchEffects(casterId, ability, targets);
+
+    if (casterId === 'tank')   this.playTankAutoAttack();
+    if (casterId === 'healer') this.playHealerCast();
+    if (casterId === 'player') this.playPlayerCast('shaman_cast_lightning');
+
+    const zone = window.GAME_CONFIG.ZONES[casterId.toUpperCase()];
+    const ui   = this.scene.get('UIScene');
+    if (ui?.spawnAbilityBadge && zone) {
+      ui.spawnAbilityBadge(zone, abilityId, ability.name ?? abilityId);
+    }
+    this.showAbilityDialogue(abilityId);
+
+    console.log('[' + casterId + '] ' + abilityId + ' | mana: ' + slot.currentMana + '/' + maxMana);
+    return true;
   }
 
   // =====================================
+  // Healer AI
+  // =====================================
+  // Priority order for the druid healer using the new abilityIds schema:
+  //   1. awaken        -- resurrect a dead ally immediately (once)
+  //   2. quicken       -- mana restore for lowest-mana ally if any at <=25%
+  //   3. spirit_surge  -- burst-cash a HoT if any ally is <=40% hp
+  //   4. renew         -- immediate heal + HoT on lowest-hp ally if <=70%
+  //   5. burgeon       -- stackable HoT if any ally <=85% and < 3 burgeon stacks
+  //   6. sustain       -- cheap HoT if lowest-hp ally <=90%
+  // OOM guard: skip all mana-costing spells if healer mana <= 15%
+  _tickHealerAI() {
+    const healerSlot = this.entitySlots.healer;
+    if (!healerSlot?._data) return;
+    if ((healerSlot.currentHealth ?? 0) <= 0) return;
+
+    const actionInterval = healerSlot._data.stats?.actionInterval ?? 1;
+    if (this.tickCount % actionInterval !== 0) return;
+
+    const current = healerSlot.sprite?.anims?.currentAnim;
+    if (current && current.key === 'healer_casting' && healerSlot.sprite.anims.isPlaying) return;
+
+    const healerMaxMana = healerSlot.manaBar?.maxValue ?? 1;
+    const healerManaPct = (healerSlot.currentMana ?? healerMaxMana) / healerMaxMana;
+
+    // Helper: hp% for a slot
+    const hpPct = id => {
+      const s = this.entitySlots[id];
+      return (s?.currentHealth ?? 0) / (s?.hpBar?.maxValue ?? 1);
+    };
+    const aliveIds  = ['player', 'tank', 'healer'].filter(id => (this.entitySlots[id]?.currentHealth ?? 0) > 0);
+    const lowestHpId = aliveIds.reduce((best, id) => hpPct(id) < hpPct(best) ? id : best, aliveIds[0] ?? 'tank');
+
+    // 1. Awaken -- dead ally
+    if (this._castCharacterAbility('healer', 'awaken')) return;
+
+    // 2. Quicken -- mana restore for lowest-mana ally at <=25%
+    {
+      let mnTarget = null, mnLowest = 0.25;
+      for (const id of aliveIds) {
+        const s   = this.entitySlots[id];
+        const pct = (s?.currentMana ?? 1) / (s?.manaBar?.maxValue ?? 1);
+        if (pct <= mnLowest) { mnLowest = pct; mnTarget = id; }
+      }
+      if (mnTarget) {
+        // Temporarily override target resolution by patching targetType context --
+        // quicken targets ally_lowest_mana so _resolveAbilityTargets will find it.
+        if (this._castCharacterAbility('healer', 'quicken')) return;
+      }
+    }
+
+    // OOM guard below this line
+    if (healerManaPct < 0.15) return;
+
+    // 3. Spirit Surge -- cash HoT on any ally <=40%
+    if (aliveIds.some(id => hpPct(id) <= 0.40)) {
+      if (this._castCharacterAbility('healer', 'spirit_surge')) return;
+    }
+
+    // 4. Renew -- immediate heal + HoT on lowest-hp ally if <=70%
+    if (hpPct(lowestHpId) <= 0.70) {
+      if (this._castCharacterAbility('healer', 'renew')) return;
+    }
+
+    // 5. Burgeon -- stackable HoT, up to 3 stacks, on any ally <=85%
+    for (const id of aliveIds) {
+      if (hpPct(id) > 0.85) continue;
+      const burgeonStacks = (this.charHoTs[id]?.['burgeon_hot']?.stacks ?? 0);
+      if (burgeonStacks < 3) {
+        if (this._castCharacterAbility('healer', 'burgeon')) return;
+      }
+    }
+
+    // 6. Sustain -- cheap rolling HoT if any ally <=90%
+    if (aliveIds.some(id => hpPct(id) <= 0.90)) {
+      if (this._castCharacterAbility('healer', 'sustain')) return;
+    }
+  }
+
   // Mana regeneration
   // =====================================
   // If a character hasn't cast anything for 5 seconds, they regen
@@ -2488,128 +2412,35 @@ export default class GameScene extends Phaser.Scene {
   // Generates threat based on each ability's threatPerDamage from the JSON.
   // Priority: Consecration > Holy Shield > Judgement of Righteousness > Judgement of Wisdom
   _tickTankAbilities() {
-    console.log("[Tank] Attacking");
     const tankSlot = this.entitySlots.tank;
     if (!tankSlot?._data) return;
     if ((tankSlot.currentHealth ?? 0) <= 0) return;
 
-    const actionInterval = tankSlot._data.stats?.actionInterval ?? 4;
+    const actionInterval = tankSlot._data.stats?.actionInterval ?? 2;
     if (this.tickCount % actionInterval !== 0) return;
 
-    // Do not cast while attack animation is playing
+    // Do not interrupt an attack animation already playing
     const current = tankSlot.sprite?.anims?.currentAnim;
     if (current && current.key === 'tank_attack' && tankSlot.sprite.anims.isPlaying) return;
 
-    const abilities = this.levelData?.abilities ?? {};
-
-    // Initialize per-ability cooldown tracker
-    if (!this.tankAbilityCooldowns) this.tankAbilityCooldowns = {};
-
-    const now = Date.now();
-
-    // Ordered priority list - first one off cooldown with enough mana fires
-    const priorityList = [
-      'holy_shield',
-      'consecration',
-      'judgement_of_wisdom',
-      'judgement_of_righteousness',
+    // Priority order drives which ability fires when multiple are available.
+    // abilityIds on the character is the canonical list; we define priority
+    // as a separate array so the designer can reorder without touching this code.
+    const priorityOrder = [
+      'provoke',               // set-max threat -- use whenever off cooldown
+      'verdict_of_prejudice',  // highest damage
+      'verdict_of_righteousness',
+      'sanctify',              // AoE holy damage
+      'verdict_of_wisdom',     // spammable filler
+      'sacred_bulwark',        // defensive -- use when available
     ];
 
-    const tankMana    = tankSlot.currentMana ?? (tankSlot.manaBar?.maxValue ?? 0);
-    const tankMaxMana = tankSlot.manaBar?.maxValue ?? 1;
+    // Filter to only abilities this character actually has
+    const abilityIds = tankSlot._data?.abilityIds ?? [];
+    const ordered = priorityOrder.filter(id => abilityIds.includes(id));
 
-    for (const abilityId of priorityList) {
-      const ability = abilities[abilityId];
-      if (!ability) continue;
-
-      // Check mana
-      if (ability.manaCost > tankMana) continue;
-
-      // Check cooldown
-      const lastUsed  = this.tankAbilityCooldowns[abilityId] ?? 0;
-      const recastMs  = (ability.recastTimer ?? 0) * 1000;
-      if (now - lastUsed < recastMs) continue;
-
-      // Fire this ability
-      this.tankAbilityCooldowns[abilityId] = now;
-
-      // Deduct mana
-      tankSlot.currentMana = Math.max(0, tankMana - ability.manaCost);
-      this._setManaBar(tankSlot.manaBar, tankSlot.currentMana / tankMaxMana);
-      this._recordCast('tank');
-
-      // Calculate and add threat
-      let threat = 0;
-
-      if (ability.immediateFlag && ability.immediateEffect?.type === 'damage') {
-        // Direct damage ability - deal damage and generate threat
-        const dmg     = ability.immediateEffect.value;
-        const iconKey = this.textures.exists('icon_' + abilityId) ? 'icon_' + abilityId : 'icon_autoAttack';
-        this._applyDamageToBoss(dmg, iconKey);
-        threat = dmg * (ability.threatPerDamage ?? 1.0);
-      } else if (ability.tickEffect?.type === 'damage' && ability.duration > 0) {
-        // DoT ability (Consecration) - deal damage each tick and generate threat
-        const tickDmg    = ability.tickEffect.value;
-        const totalTicks = ability.duration;
-        const iconKey    = this.textures.exists('icon_' + abilityId) ? 'icon_' + abilityId : 'icon_autoAttack';
-        let   ticksFired = 0;
-        const dotTimer   = this.time.addEvent({
-          delay:    window.GAME_CONFIG.TICK_MS,
-          loop:     true,
-          callback: () => {
-            ticksFired++;
-            this._applyDamageToBoss(tickDmg, iconKey);
-            if (ticksFired >= totalTicks || !this.gameRunning) dotTimer.remove();
-          },
-        });
-        threat = tickDmg * totalTicks * (ability.threatPerDamage ?? 1.0);
-      } else if (ability.immediateEffect?.type === 'apply_buff' && abilityId === 'holy_shield') {
-        // Holy Shield - activate the reactive block buff on the tank
-        const eff      = ability.immediateEffect;
-        const durationMs = (eff.duration ?? 10) * 1000;
-        this.entitySlots.tank.holyShield = {
-          active:     true,
-          charges:    eff.charges     ?? 4,
-          blockChance: eff.blockChance ?? 30,
-          blockDamage: eff.blockDamage ?? 59,
-          blockThreatMultiplier: eff.blockThreatMultiplier ?? 1.35,
-          expiresAt:  Date.now() + durationMs,
-        };
-        // Schedule deactivation
-        this.time.delayedCall(durationMs, () => {
-          if (this.entitySlots.tank?.holyShield) {
-            this.entitySlots.tank.holyShield.active = false;
-          }
-        });
-        // Small activation threat
-        threat = 50 * (ability.threatPerDamage ?? 1.3);
-        console.log('[Tank] Holy Shield active - charges:', eff.charges ?? 4);
-        this._emitBuffUpdate('tank');
-      } else {
-        // Other buff/utility abilities - flat threat only
-        threat = 200 * (ability.threatPerDamage ?? 0.5);
-      }
-
-      this.addThreat('tank', Math.round(threat));
-      this._updateThreatMeters();
-
-      // Play attack animation for damage abilities
-      if (ability.immediateFlag && ability.immediateEffect?.type === 'damage') {
-        this.playTankAutoAttack();
-      }
-
-      console.log('[Tank] Ability:', abilityId, '-> threat', Math.round(threat),
-        '| mana remaining:', tankSlot.currentMana);
-
-      // Badge on tank showing the ability used
-      const uiForTank = this.scene.get('UIScene');
-      if (uiForTank?.spawnAbilityBadge) {
-        const abilityName = this.levelData?.abilities?.[abilityId]?.name ?? abilityId;
-        uiForTank.spawnAbilityBadge(window.GAME_CONFIG.ZONES.TANK, abilityId, abilityName);
-      }
-
-      // Only one ability per action interval
-      break;
+    for (const abilityId of ordered) {
+      if (this._castCharacterAbility('tank', abilityId)) break;
     }
   }
 
@@ -2735,16 +2566,21 @@ export default class GameScene extends Phaser.Scene {
   }
 
   _onPlayerAbility(abilityId) {
-    console.log('[GameScene] Ability:', abilityId);
+    const ability = this.levelData?.abilities?.[abilityId];
+
+    // Route to the new engine if this ability has an effects[] array
+    if (ability?.effects) {
+      this._castCharacterAbility('player', abilityId);
+      return;
+    }
+
+    // Legacy fallback (totem abilities still go through old path)
     this._recordCast('player');
+    console.log('[GameScene] Ability (legacy):', abilityId);
 
-    if (abilityId === 'lightning_bolt')  this._castPlayerSpell('lightning_bolt',  'shaman_cast_lightning');
-    if (abilityId === 'chain_lightning') this._castPlayerSpell('chain_lightning', 'shaman_cast_chain');
-
-    // Badge on player showing the ability used
     const uiForPlayer = this.scene.get('UIScene');
     if (uiForPlayer?.spawnAbilityBadge) {
-      const abilityName = this.levelData?.abilities?.[abilityId]?.name ?? abilityId;
+      const abilityName = ability?.name ?? abilityId;
       uiForPlayer.spawnAbilityBadge(window.GAME_CONFIG.ZONES.PLAYER, abilityId, abilityName);
     }
 
@@ -2759,7 +2595,6 @@ export default class GameScene extends Phaser.Scene {
       this.playTotemPlacement(totemSlots[abilityId]);
     }
 
-    // Show any dialogue defined for this ability in the JSON
     this.showAbilityDialogue(abilityId);
   }
 

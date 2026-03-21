@@ -1,42 +1,42 @@
 {
   "level": {
-    "id": "the_cracked_mountain_grull_the_wyrm_whacker",
-    "name": "Grull the Wyrm Whacker",
-    "raidId": "the_cracked_mountain",
-    "bossId": "grull_the_wyrm_whacker"
+    "id": "the_basement_demon_magtheridax",
+    "name": "Magtheridax the Frustrated",
+    "raidId": "the_basement_demon",
+    "bossId": "magtheridax"
   },
   "assets": {
     "background": {
-      "key": "bg_encounter_grull_the_wyrm_whacker",
-      "path": "assets/raids/the_cracked_mountain/backgrounds/bg_grull_the_wyrm_whacker.webp"
+      "key": "bg_encounter_magtheridax",
+      "path": "assets/raids/bg_the_basement_demon.webp"
     },
     "spritesheets": [
       {
-        "key": "boss_grull_the_wyrm_whacker_idle",
-        "path": "assets/raids/the_cracked_mountain/bosses/grull_the_wyrm_whacker/boss_grull_the_wyrm_whacker_idle.webp",
+        "key": "boss_magtheridax_idle",
+        "path": "assets/raids/the_basement_demon/bosses/magtheridax/magtheridax_idle.webp",
         "frameWidth": 256,
         "frameHeight": 256
       },
       {
-        "key": "boss_grull_the_wyrm_whacker_attacking",
-        "path": "assets/raids/the_cracked_mountain/bosses/grull_the_wyrm_whacker/boss_grull_the_wyrm_whacker_attacking.webp",
+        "key": "boss_magtheridax_attacking",
+        "path": "assets/raids/the_basement_demon/bosses/magtheridax/magtheridax_attacking.webp",
         "frameWidth": 256,
         "frameHeight": 256
       },
       {
-        "key": "boss_grull_the_wyrm_whacker_defeated",
-        "path": "assets/raids/the_cracked_mountain/bosses/grull_the_wyrm_whacker/boss_grull_the_wyrm_whacker_defeated.webp",
+        "key": "boss_magtheridax_defeated",
+        "path": "assets/raids/the_basement_demon/bosses/magtheridax/magtheridax_defeated.web",
         "frameWidth": 256,
         "frameHeight": 256
       }
     ]
   },
   "boss": {
-    "id": "grull_the_wyrm_whacker",
-    "name": "Grull the Wyrm Whacker",
+    "id": "magtheridax",
+    "name": "Magtheridax the Frustrated",
     "stats": {
-      "health": 650000,
-      "maxHealth": 650000,
+      "health": 500000,
+      "maxHealth": 500000,
       "mana": 100000,
       "maxMana": 100000,
       "usesMana": false,
@@ -53,8 +53,8 @@
         "water": 0,
         "nature": 0,
         "holy": 0,
-        "shadow": 0,
-        "arcane": 0
+        "shadow": 75,
+        "arcane": 25
       }
     },
     "phases": [
@@ -66,56 +66,55 @@
           "value": 100
         },
         "abilityIds": [
-          "wyrm_whack",
-          "ground_tremor",
-          "stone_spike"
+          "fel_frustration",
+          "demonic_tantrum",
+          "exasperated_void_bolt"
         ]
       }
     ],
     "dialog": {
       "intro": [
-        "Grull whacked many wyrms. Now Grull whack you.",
-        "YOU ARE SMALLER THAN WYRM. THIS WILL BE QUICK."
+        "Oh, visitors? FINALLY. Do you have ANY idea how long I've been down here?",
+        "I'm going to end you, but I want you to know this is nothing personal."
       ],
       "defeat": [
-        "Grull... whacked. This is... embarrassing."
+        "Defeated again. Of course. This is EXACTLY how my day was going."
       ],
       "victory": [
-        "GRULL IS UNDEFEATED. GRULL IS LEGEND. GRULL NEED SNACK."
+        "Hmph. At least THAT went the way I planned. First time today."
       ]
     },
     "sounds": {
-      "intro": "assets/raids/the_cracked_mountain/sounds/sound_intro_grull_the_wyrm_whacker.ogg",
-      "attack": "assets/raids/the_cracked_mountain/sounds/sound_attack_grull_the_wyrm_whacker.ogg",
-      "hit": "assets/raids/the_cracked_mountain/sounds/sound_hit_grull_the_wyrm_whacker.ogg",
-      "defeat": "assets/raids/the_cracked_mountain/sounds/sound_defeat_grull_the_wyrm_whacker.ogg",
-      "victory": "assets/raids/the_cracked_mountain/sounds/sound_victory.ogg"
+      "intro": "assets/raids/the_basement_demon/sounds/sound_intro_magtheridax.ogg",
+      "attack": "assets/raids/the_basement_demon/sounds/sound_attack_magtheridax.ogg",
+      "hit": "assets/raids/the_basement_demon/sounds/sound_hit_magtheridax.ogg",
+      "defeat": "assets/raids/the_basement_demon/sounds/sound_defeat_magtheridax.ogg",
+      "victory": "assets/raids/the_basement_demon/sounds/sound_victory.ogg"
     },
     "threatTable": {
       "player": 0,
       "tank": 0,
       "healer": 0
     },
-    "spriteKey": "boss_grull_the_wyrm_whacker_idle",
+    "spriteKey": "boss_magtheridax_idle",
     "spriteScale": 3,
     "animations": {
       "idle": {
-        "key": "boss_grull_the_wyrm_whacker_idle",
+        "key": "boss_magtheridax_idle",
         "startFrame": 0,
-        "endFrame": 8,
-        "frameRate": 8,
-        "skipMissedFrames": false,
+        "endFrame": 9,
+        "frameRate": 6,
         "repeat": -1
       },
       "attack": {
-        "key": "boss_grull_the_wyrm_whacker_attacking",
+        "key": "boss_magtheridax_attacking",
         "startFrame": 0,
         "endFrame": 15,
         "frameRate": 12,
         "repeat": 0
       },
       "defeated": {
-        "key": "boss_grull_the_wyrm_whacker_defeated",
+        "key": "boss_magtheridax_defeated",
         "startFrame": 0,
         "endFrame": 15,
         "frameRate": 10,
@@ -190,71 +189,71 @@
     }
   },
   "abilities": {
-    "wyrm_whack": {
-      "id": "wyrm_whack",
-      "name": "Wyrm Whack",
+    "fel_frustration": {
+      "id": "fel_frustration",
+      "name": "Fel Frustration",
       "type": "boss_mechanic",
       "manaCost": 0,
       "immediateFlag": true,
       "immediateEffect": {
         "type": "damage",
-        "damageType": "nature"
+        "damageType": "shadow"
       },
-      "immediateMin": 3000,
-      "immediateMax": 5000,
+      "immediateMin": 2200,
+      "immediateMax": 3800,
       "duration": 0,
       "tickEffect": null,
       "tickMin": 0,
       "tickMax": 0,
       "threatPerDamage": 0,
-      "recastTimer": 10,
+      "recastTimer": 14,
       "targetType": "highest_threat",
-      "dialogue": "GRULL WHACK WYRM. GRULL WHACK YOU TOO."
+      "dialogue": "YOU HAVE NO IDEA HOW FRUSTRATING THIS IS!"
     },
-    "ground_tremor": {
-      "id": "ground_tremor",
-      "name": "Ground Tremor",
+    "demonic_tantrum": {
+      "id": "demonic_tantrum",
+      "name": "Demonic Tantrum",
       "type": "boss_mechanic",
       "manaCost": 0,
       "immediateFlag": true,
       "immediateEffect": {
         "type": "damage",
-        "damageType": "nature"
+        "damageType": "shadow"
       },
       "immediateMin": 1500,
       "immediateMax": 2500,
-      "duration": 0,
-      "tickEffect": null,
-      "tickMin": 0,
-      "tickMax": 0,
+      "duration": 3,
+      "tickEffect": {
+        "type": "damage",
+        "damageType": "shadow"
+      },
+      "tickMin": 400,
+      "tickMax": 700,
       "threatPerDamage": 0,
-      "recastTimer": 15,
+      "recastTimer": 18,
       "targetType": "all_allies",
-      "dialogue": "The ground shakes as Grull pounds the earth!"
+      "dialogue": "I HAVE BEEN STUCK DOWN HERE FOR A THOUSAND YEARS!"
     },
-    "stone_spike": {
-      "id": "stone_spike",
-      "name": "Stone Spike",
+    "exasperated_void_bolt": {
+      "id": "exasperated_void_bolt",
+      "name": "Exasperated Void Bolt",
       "type": "boss_mechanic",
       "manaCost": 0,
       "immediateFlag": true,
       "immediateEffect": {
         "type": "damage",
-        "damageType": "nature"
+        "damageType": "shadow"
       },
-      "immediateMin": 4000,
-      "immediateMax": 6500,
-      "duration": 5,
-      "tickEffect": {
-        "type": "damage",
-        "damageType": "nature"
-      },
-      "tickMin": 600,
-      "tickMax": 900,
+      "immediateMin": 3500,
+      "immediateMax": 5500,
+      "duration": 0,
+      "tickEffect": null,
+      "tickMin": 0,
+      "tickMax": 0,
       "threatPerDamage": 0,
-      "recastTimer": 30,
+      "recastTimer": 25,
       "targetType": "highest_threat",
-      "dialogue": "STONE SPIKE. VERY POINTY."
+      "dialogue": "WOULD IT KILL SOMEONE TO SEND ME A MEMO?!"
     }
   }
 }

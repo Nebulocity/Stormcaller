@@ -1,9 +1,7 @@
 /**
  * raidCatalog.js
  *
- * The single source of truth for all raids and bosses in the game.
- *
- * Each raid has:
+  * Each raid has:
  *   - id, name
  *   - buttonKey / buttonPath: image shown on the raid selection screen
  *   - backgroundKey / backgroundPath: background shown on the boss selection screen
@@ -31,8 +29,14 @@ function raidAssetPath(raidId, filename) {
   return `assets/raids/${raidId}/${filename}`;
 }
 
-function bossAssetPath(raidId, bossId, subfolder, filename) {
-  return `assets/raids/${raidId}/${subfolder}/${filename}`;
+// For files that sit directly under assets/raids/ (e.g. bg_spookspire_keep.webp)
+function raidRootPath(filename) {
+  return `assets/raids/${filename}`;
+}
+
+// Boss spritesheets live at assets/raids/<raidId>/bosses/<bossId>/<filename>
+function bossSpriteSheet(raidId, bossId, filename) {
+  return `assets/raids/${raidId}/bosses/${bossId}/${filename}`;
 }
 
 // ============================================================
@@ -48,7 +52,7 @@ const the_basement_demon = {
   bannerKey:       'banner_the_basement_demon',
   bannerPath:      raidAssetPath('the_basement_demon', 'banner_the_basement_demon.webp'),
   backgroundKey:   'bg_the_basement_demon',
-  backgroundPath:  raidAssetPath('the_basement_demon', 'bg_the_basement_demon.webp'),
+  backgroundPath:  raidRootPath('bg_the_basement_demon.webp'),
   bosses: [
     {
       id:                       'magtheridax',
@@ -56,13 +60,13 @@ const the_basement_demon = {
       buttonKey:                'button_boss_magtheridax',
       buttonPath:               raidAssetPath('the_basement_demon', 'buttons/button_magtheridax.webp'),
       encounterBackgroundKey:   'bg_the_basement_demon',
-      encounterBackgroundPath:  raidAssetPath('the_basement_demon', 'backgrounds/bg_the_basement_demon.webp'),
+      encounterBackgroundPath:  raidRootPath('bg_the_basement_demon.webp'),
       idleKey:                  'boss_magtheridax_idle',
-      idlePath:                 raidAssetPath('the_basement_demon', 'bosses/idle/boss_magtheridax_idle.webp'),
+      idlePath:                 bossSpriteSheet('the_basement_demon', 'magtheridax', 'magtheridax_idle.webp'),
       attackingKey:             'boss_magtheridax_attacking',
-      attackingPath:            raidAssetPath('the_basement_demon', 'bosses/attacking/boss_magtheridax_attacking.webp'),
+      attackingPath:            bossSpriteSheet('the_basement_demon', 'magtheridax', 'magtheridax_attacking.webp'),
       defeatedKey:              'boss_magtheridax_defeated',
-      defeatedPath:             raidAssetPath('the_basement_demon', 'bosses/defeated/boss_magtheridax_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('the_basement_demon', 'magtheridax', 'magtheridax_defeated.web'),
       levelKey:                 'level_magtheridax',
       levelPath:                'data/the_basement_demon/magtheridax.json',
       unlockedBy:               [],
@@ -85,21 +89,21 @@ const THE_CRACKED_MOUNTAIN = {
   bannerKey:       'banner_the_cracked_mountain',
   bannerPath:      raidAssetPath('the_cracked_mountain', 'banner_the_cracked_mountain.webp'),
   backgroundKey:   'bg_the_cracked_mountain',
-  backgroundPath:  raidAssetPath('the_cracked_mountain', 'bg_the_cracked_mountain.webp'),
+  backgroundPath:  raidRootPath('bg_the_cracked_mountain.webp'),
   bosses: [
     {
       id:                       'high_chief_bonkgar',
       name:                     'High Chief Bonkgar',
       buttonKey:                'button_boss_high_chief_bonkgar',
-      buttonPath:               raidAssetPath('the_cracked_mountain', 'buttons/button_high_chief_bonkgar.webp'),
+      buttonPath:               raidAssetPath('the_cracked_mountain', 'buttons/high_chief_bonkgar.webp'),
       encounterBackgroundKey:   'bg_encounter_high_chief_bonkgar',
       encounterBackgroundPath:  raidAssetPath('the_cracked_mountain', 'backgrounds/bg_high_chief_bonkgar.webp'),
       idleKey:                  'boss_high_chief_bonkgar_idle',
-      idlePath:                 raidAssetPath('the_cracked_mountain', 'bosses/idle/boss_high_chief_bonkgar_idle.webp'),
+      idlePath:                 bossSpriteSheet('the_cracked_mountain', 'high_chief_bonkgar', 'boss_high_chief_bonkgar_idle.webp'),
       attackingKey:             'boss_high_chief_bonkgar_attacking',
-      attackingPath:            raidAssetPath('the_cracked_mountain', 'bosses/attacking/boss_high_chief_bonkgar_attacking.webp'),
+      attackingPath:            bossSpriteSheet('the_cracked_mountain', 'high_chief_bonkgar', 'boss_high_chief_bonkgar_attacking.webp'),
       defeatedKey:              'boss_high_chief_bonkgar_defeated',
-      defeatedPath:             raidAssetPath('the_cracked_mountain', 'bosses/defeated/boss_high_chief_bonkgar_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('the_cracked_mountain', 'high_chief_bonkgar', 'boss_high_chief_bonkgar_defeated.webp'),
       levelKey:                 'level_high_chief_bonkgar',
       levelPath:                'data/the_cracked_mountain/high_chief_bonkgar.json',
       unlockedBy:               [],
@@ -112,11 +116,11 @@ const THE_CRACKED_MOUNTAIN = {
       encounterBackgroundKey:   'bg_encounter_grull',
       encounterBackgroundPath:  raidAssetPath('the_cracked_mountain', 'backgrounds/bg_grull_the_wyrm_whacker.webp'),
       idleKey:                  'boss_grull_idle',
-      idlePath:                 raidAssetPath('the_cracked_mountain', 'bosses/idle/boss_grull_the_wyrm_whacker_idle.webp'),
+      idlePath:                 bossSpriteSheet('the_cracked_mountain', 'grull_the_wyrm_whacker', 'boss_grull_the_wyrm_whacker_idle.webp'),
       attackingKey:             'boss_grull_attacking',
-      attackingPath:            raidAssetPath('the_cracked_mountain', 'bosses/attacking/boss_grull_the_wyrm_whacker_attacking.webp'),
+      attackingPath:            bossSpriteSheet('the_cracked_mountain', 'grull_the_wyrm_whacker', 'boss_grull_the_wyrm_whacker_attacking.webp'),
       defeatedKey:              'boss_grull_defeated',
-      defeatedPath:             raidAssetPath('the_cracked_mountain', 'bosses/defeated/boss_grull_the_wyrm_whacker_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('the_cracked_mountain', 'grull_the_wyrm_whacker', 'boss_grull_the_wyrm_whacker_defeated.webp'),
       levelKey:                 'level_grull',
       levelPath:                'data/the_cracked_mountain/grull_the_wyrm_whacker.json',
       unlockedBy:               ['high_chief_bonkgar'],
@@ -152,7 +156,7 @@ const SPOOKSPIRE_KEEP = {
   bannerKey:       'banner_spookspire_keep',
   bannerPath:      raidAssetPath('spookspire_keep', 'banner_spookspire_keep.webp'),
   backgroundKey:   'bg_spookspire_keep',
-  backgroundPath:  raidAssetPath('spookspire_keep', 'bg_spookspire_keep.webp'),
+  backgroundPath:  raidRootPath('bg_spookspire_keep.webp'),
   bosses: [
     {
       id:                       'sir_trotsalot_and_nighttime',
@@ -162,11 +166,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_sir_trotsalot',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_boss_sir_trotsalot.webp'),
       idleKey:                  'boss_sir_trotsalot_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/idle/boss_sir_trotsalot_idle.webp'),
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'sir_trotsalot', 'boss_sir_trotsalot_idle.webp'),
       attackingKey:             'boss_sir_trotsalot_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_sir_trotsalot_attacking.webp'),
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'sir_trotsalot', 'boss_sir_trotsalot_attacking.webp'),
       defeatedKey:              'boss_sir_trotsalot_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_sir_trotsalot_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'sir_trotsalot', 'boss_sir_trotsalot_mounted_defeated.webp'),
       levelKey:                 'level_sir_trotsalot',
       levelPath:                'data/spookspire_keep/nighttime_sir_trotsalot.json',
       unlockedBy:               [],
@@ -179,11 +183,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_mortimer',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_boss_mortimer.webp'),
       idleKey:                  'boss_mortimer_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/idle/boss_mortimer_idle.webp'),
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'mortimer', 'boss_mortimer_idle.webp'),
       attackingKey:             'boss_mortimer_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_mortimer_attacking.webp'),
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'mortimer', 'boss_mortimer_attacking.webp'),
       defeatedKey:              'boss_mortimer_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_mortimer_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'mortimer', 'boss_mortimer_defeated.webp'),
       levelKey:                 'level_mortimer',
       levelPath:                'data/spookspire_keep/mortimer.json',
       unlockedBy:               ['sir_trotsalot_and_nighttime'],
@@ -196,11 +200,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_lady_proper',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_lady_proper.webp'),
       idleKey:                  'boss_lady_proper_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/splash/boss_lady_proper.webp'),  // TODO: add idle sheet
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'lady_proper', 'boss_lady_proper_idle.webp'),
       attackingKey:             'boss_lady_proper_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/splash/boss_lady_proper.webp'),  // TODO: add attacking sheet
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'lady_proper', 'boss_lady_proper_attacking.webp'),
       defeatedKey:              'boss_lady_proper_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/splash/boss_lady_proper.webp'),  // TODO: add defeated sheet
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'lady_proper', 'boss_lady_proper_defeated.webp'),
       levelKey:                 'level_lady_proper',
       levelPath:                'data/spookspire_keep/lady_properness.json',
       unlockedBy:               ['sir_trotsalot_and_nighttime'],
@@ -213,11 +217,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_the_movie_theater',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_the_movie_theater_closed.webp'),
       idleKey:                  'boss_the_movie_theater_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/idle/boss_sir_trotsalot_idle.webp'),  // TODO: add movie theater idle sheet
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'sir_trotsalot', 'boss_sir_trotsalot_idle.webp'),  // TODO: add movie theater idle sheet
       attackingKey:             'boss_the_movie_theater_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_sir_trotsalot_attacking.webp'),  // TODO: add movie theater attacking sheet
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'sir_trotsalot', 'boss_sir_trotsalot_attacking.webp'),  // TODO: add movie theater attacking sheet
       defeatedKey:              'boss_the_movie_theater_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_sir_trotsalot_defeated.webp'),  // TODO: add movie theater defeated sheet
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'sir_trotsalot', 'boss_sir_trotsalot_mounted_defeated.webp'),  // TODO: add movie theater defeated sheet
       levelKey:                 'level_the_movie_theater',
       levelPath:                'data/spookspire_keep/the_movie_theater.json',
       unlockedBy:               ['mortimer'],
@@ -230,11 +234,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_the_archivist',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_the_archivist.webp'),
       idleKey:                  'boss_the_archivist_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/idle/boss_the_archivist_idle.webp'),
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'the_archivist', 'boss_the_archivist_idle.webp'),
       attackingKey:             'boss_the_archivist_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_the_archivist_attacking.webp'),
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'the_archivist', 'boss_the_archivist_attacking.webp'),
       defeatedKey:              'boss_the_archivist_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_the_archivist_.defeated.webp'),
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'the_archivist', 'boss_the_archivist_.defeated.webp'),
       levelKey:                 'level_the_archivist',
       levelPath:                'data/spookspire_keep/archivist.json',
       unlockedBy:               ['mortimer'],
@@ -247,11 +251,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_aether_drake',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_aether_drake.webp'),
       idleKey:                  'boss_aether_drake_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/idle/boss_aether_drake_idle.webp'),
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'aether_drake', 'boss_aether_drake_idle.webp'),
       attackingKey:             'boss_aether_drake_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_aether_drake_attacking.webp'),
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'aether_drake', 'boss_aether_drake_attacking.webp'),
       defeatedKey:              'boss_aether_drake_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_aether_drake_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'aether_drake', 'boss_aether_drake_defeated.webp'),
       levelKey:                 'level_aether_drake',
       levelPath:                'data/spookspire_keep/aether_drake.json',
       unlockedBy:               ['the_archivist'],
@@ -264,11 +268,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_phantom_magister',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_phantom_magister.webp'),
       idleKey:                  'boss_phantom_magister_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/splash/boss_phantom_magister.webp'),
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'phantom_magister', 'boss_phatnom_magister_idle.webp'),
       attackingKey:             'boss_phantom_magister_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_phatnom_magister_attacking.webp'),
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'phantom_magister', 'boss_phatnom_magister_attacking.webp'),
       defeatedKey:              'boss_phantom_magister_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_phatnom_magister_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'phantom_magister', 'boss_phatnom_magister_defeated.webp'),
       levelKey:                 'level_phantom_magister',
       levelPath:                'data/spookspire_keep/phantom_magister.json',
       unlockedBy:               ['the_movie_theater'],
@@ -281,11 +285,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_malvestian_doomhoof',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_malvestian_doomhoof.webp'),
       idleKey:                  'boss_malvestian_doomhoof_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/idle/boss_malvestian_doomhoof_idle.webp'),
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'malvestian_doomhoof', 'boss_malvestian_doomhoof_idle.webp'),
       attackingKey:             'boss_malvestian_doomhoof_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_malvestian_doomhoof_attacking.webp'),
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'malvestian_doomhoof', 'boss_malvestian_doomhoof_attacking.webp'),
       defeatedKey:              'boss_malvestian_doomhoof_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_malvestian_doomhoof_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'malvestian_doomhoof', 'boss_malvestian_doomhoof_defeated.webp'),
       levelKey:                 'level_malvestian_doomhoof',
       levelPath:                'data/spookspire_keep/malvestian_doomhoof.json',
       unlockedBy:               ['phantom_magister'],
@@ -298,11 +302,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_prince_malarkey',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_prince_malarkey.webp'),
       idleKey:                  'boss_prince_malarkey_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/idle/boss_prince_malarkey_idle.webp'),
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'prince_malarkey', 'boss_prince_malarkey_idle.webp'),
       attackingKey:             'boss_prince_malarkey_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_prince_malarkey_attacking.webp'),
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'prince_malarkey', 'boss_prince_malarkey_attacking.webp'),
       defeatedKey:              'boss_prince_malarkey_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_prince_malarkey_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'prince_malarkey', 'boss_prince_malarkey_defeated.webp'),
       levelKey:                 'level_prince_malarkey',
       levelPath:                'data/spookspire_keep/prince_malarkey.json',
       unlockedBy:               ['the_movie_theater', 'the_archivist'],
@@ -315,11 +319,11 @@ const SPOOKSPIRE_KEEP = {
       encounterBackgroundKey:   'bg_encounter_dreadwing',
       encounterBackgroundPath:  raidAssetPath('spookspire_keep', 'backgrounds/bg_dreadwing.webp'),
       idleKey:                  'boss_dreadwing_idle',
-      idlePath:                 raidAssetPath('spookspire_keep', 'bosses/idle/boss_dreadwing_idle.webp'),
+      idlePath:                 bossSpriteSheet('spookspire_keep', 'dreadwing', 'boss_dreadwing_idle.webp'),
       attackingKey:             'boss_dreadwing_attacking',
-      attackingPath:            raidAssetPath('spookspire_keep', 'bosses/attacking/boss_dreadwing_attacking.webp'),
+      attackingPath:            bossSpriteSheet('spookspire_keep', 'dreadwing', 'boss_dreadwing_attacking.webp'),
       defeatedKey:              'boss_dreadwing_defeated',
-      defeatedPath:             raidAssetPath('spookspire_keep', 'bosses/defeated/boss_dreadwing_defeated.webp'),
+      defeatedPath:             bossSpriteSheet('spookspire_keep', 'dreadwing', 'boss_dreadwing_defeated.webp'),
       levelKey:                 'level_dreadwing',
       levelPath:                'data/spookspire_keep/dreadwing_the_restless.json',
       unlockedBy:               ['phantom_magister'],

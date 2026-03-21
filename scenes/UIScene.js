@@ -118,7 +118,9 @@ export default class UIScene extends Phaser.Scene {
     // ========================
     // Left side: spell buttons
     // ========================
-    const spellAbilityIds = ['lightning_bolt', 'chain_lightning'];
+    // Spell buttons driven by the player character's ability list.
+    // Max 4 buttons fit before the totem divider; slice to be safe.
+    const spellAbilityIds = (levelData?.characters?.player?.abilityIds ?? []).slice(0, 4);
 
     spellAbilityIds.forEach((abilityId, i) => {
       const ability = levelData?.abilities?.[abilityId];
@@ -211,7 +213,7 @@ export default class UIScene extends Phaser.Scene {
 
     bg.on('pointerdown', () => this._pressSpellButton(abilityId, ability, bg, cdOverlay));
     bg.on('pointerover', () => {
-      if (!this.cooldowns[abilityId] && !this.lbLocked) bg.setStrokeStyle(3, 0xffd700, 1);
+      if (!this.cooldowns[abilityId]) bg.setStrokeStyle(3, 0xffd700, 1);
     });
     bg.on('pointerout', () => {
       if (!this.cooldowns[abilityId]) bg.setStrokeStyle(3, 0x4466aa, 1.0);
@@ -221,36 +223,21 @@ export default class UIScene extends Phaser.Scene {
   }
 
   _pressSpellButton(abilityId, ability, bg, cdOverlay) {
-    // Block if on cooldown (Chain Lightning recast) or per-tick lock (Lightning Bolt)
     if (this.cooldowns[abilityId]) return;
-    if (abilityId === 'lightning_bolt' && this.lbLocked) return;
 
     // Brief press flash
     this.tweens.add({ targets: bg, alpha: 0.4, duration: 80, yoyo: true });
 
-    // Lightning Bolt: disable until next tick fires
-    if (abilityId === 'lightning_bolt') {
-      this.lbLocked = true;
-      bg.setStrokeStyle(3, 0x555555, 0.5);
-      cdOverlay.setVisible(true).setDisplaySize(150, 150);
-      // Unlock on next tick event
-      const gameScene = this.scene.get('GameScene');
-      if (gameScene) {
-        gameScene.events.once('tick', () => {
-          this.lbLocked = false;
-          cdOverlay.setVisible(false);
-          bg.setStrokeStyle(3, 0x4466aa, 1.0);
-        });
-      }
-    }
-
-    // Chain Lightning: start recast cooldown
-    const recastMs = (ability?.recastTimer ?? 0) * 1000;
+    // Start visual cooldown.
+    // New schema uses recastTicks (ticks x TICK_MS = ms); legacy uses recastTimer (seconds).
+    const TICK_MS  = window.GAME_CONFIG.TICK_MS;
+    const recastMs = ((ability?.recastTicks ?? 0) * TICK_MS)
+                   || ((ability?.recastTimer  ?? 0) * 1000);
     if (recastMs > 0) {
       this._startCooldown(abilityId, recastMs, ability, cdOverlay);
     }
 
-    // Emit to GameScene
+    // Emit to GameScene -- it owns the authoritative cooldown gate
     const gameScene = this.scene.get('GameScene');
     if (gameScene) {
       gameScene.events.emit('player-ability', abilityId);
