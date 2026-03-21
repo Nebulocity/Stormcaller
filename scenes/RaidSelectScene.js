@@ -164,9 +164,9 @@ export default class RaidSelectScene extends Phaser.Scene {
 
     panel.on('pointerdown', () => {
       this.tweens.add({
-        targets:  [panel, thumb],
-        scaleX:   0.97,
-        scaleY:   0.97,
+        targets:  [panel],
+        scaleX:   0.98,
+        scaleY:   0.98,
         duration: 80,
         yoyo:     true,
       });
@@ -186,9 +186,9 @@ export default class RaidSelectScene extends Phaser.Scene {
   _drawBackButton() {
     const { WIDTH, HEIGHT } = window.GAME_CONFIG;
 
-    const btn = this.add.text(80, HEIGHT * 0.96, '< BACK', {
+    const btn = this.add.text(85, HEIGHT * 0.96, '< BACK', {
       fontFamily:      'monospace',
-      fontSize:        '36px',
+      fontSize:        '48px',
       color:           '#ccaa66',
       stroke:          '#000000',
       strokeThickness: 4,

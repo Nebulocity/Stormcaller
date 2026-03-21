@@ -184,9 +184,9 @@ export default class RaidBossSelectScene extends Phaser.Scene {
     const { HEIGHT } = window.GAME_CONFIG;
 
     // Text-based back button - replace with sprite version later
-    const btn = this.add.text(80, HEIGHT * 0.96, '< BACK', {
+    const btn = this.add.text(85, HEIGHT * 0.96, '< BACK', {
       fontFamily: 'monospace',
-      fontSize:   '36px',
+      fontSize:   '48px',
       color:      '#ccaa66',
       stroke:     '#000000',
       strokeThickness: 4,
