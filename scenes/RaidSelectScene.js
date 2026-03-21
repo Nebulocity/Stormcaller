@@ -91,7 +91,7 @@ export default class RaidSelectScene extends Phaser.Scene {
     // Panel background
     const panel = this.add.rectangle(btnX, btnY, btnW, BTN_HEIGHT, 0x000000)
       .setStrokeStyle(3, 0x554422, 0.9)
-      .setAlpha(alpha);
+      .setAlpha(.65);
 
     // Thumbnail -- scale to fit the button height minus insets
     const thumbSize = BTN_HEIGHT - THUMB_INSET * 2;
